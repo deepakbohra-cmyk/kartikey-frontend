@@ -99,16 +99,16 @@ const L1Form = () => {
     }, 2000);
   };
 
-  const handleClear = () => {
-    setFormData({
-      timestamp: new Date().toLocaleString(),
-      workType: "",
-      email: "",
-      gid: "",
-      decision: "",
-    });
-    setIsChecked(false);
-  };
+  // const handleClear = () => {
+  //   setFormData({
+  //     timestamp: new Date().toLocaleString(),
+  //     workType: "",
+  //     email: "",
+  //     gid: "",
+  //     decision: "",
+  //   });
+  //   setIsChecked(false);
+  // };
 
   if (submitted) {
     return (
@@ -125,8 +125,8 @@ const L1Form = () => {
 
   return (
     <div className="min-h-screen bg-purple-50 py-8 px-4">
-      <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow">
-        <div className="bg-white rounded-lg border-t-4 border-purple-600 shadow-sm">
+      {/* <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow"> */}
+        <div className="max-w-2xl mx-auto mt-13 bg-white rounded-lg border-t-4 border-purple-600 shadow-sm">
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
             <h1 className="text-3xl font-normal text-gray-800 mb-6">
               L1 Form
@@ -153,7 +153,7 @@ const L1Form = () => {
                 name="workType"
                 value={formData.workType}
                 onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none appearance-none "
                 required
               >
                 <option value="">Select work type</option>
@@ -184,7 +184,7 @@ const L1Form = () => {
                 name="decision"
                 value={formData.decision}
                 onChange={handleChange}
-                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none appearance-none"
                 required
               >
                 <option value="">Select a decision</option>
@@ -199,28 +199,28 @@ const L1Form = () => {
               </select>
             </div>
 
-            <div className="flex justify-between pt-6">
-              <button
+            <div className="flex justify-center pt-6">
+              {/* <button
                 type="button"
                 onClick={handleClear}
                 className="px-6 py-2 text-purple-600 border border-purple-600 rounded-md hover:bg-purple-50 focus:outline-none"
               >
                 Clear form
-              </button>
+              </button> */}
               <button
                 type="submit"
-                className={`flex items-center px-8 py-2 rounded-md text-white ${
+                className={`flex items-center px-8 py-2 rounded-md text-white cursor-pointer ${
                   isChecked ? "bg-purple-600 hover:bg-purple-700" : "bg-gray-400 cursor-not-allowed"
                 }`}
                 disabled={!isChecked}
               >
-                <Send className="w-4 h-4 mr-2" />
+                {/* <Send className="w-4 h-4 mr-2" /> */}
                 Submit
               </button>
             </div>
           </form>
         </div>
-      </div>
+      {/* </div> */}
     </div>
   );
 };
