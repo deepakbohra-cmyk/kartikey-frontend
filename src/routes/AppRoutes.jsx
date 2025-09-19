@@ -7,6 +7,7 @@ import Home from '../components/home/Home'
 import Kartikey from '../components/qcteam/Kartikey'
 import L1Form from '../components/l1team/L1Form'
 import SheetData from '../components/qcteam/SheetData'
+import FeedbackForm from '../components/feedbackform/feedbakcform' 
 
 function AppRoutes() {
   return (
@@ -18,6 +19,7 @@ function AppRoutes() {
         <Route path="/kartikey" element={<Kartikey />} />
         <Route path="/l1form" element={<L1Form />} />
         <Route path="/sheetdata" element={<SheetData />} />
+        <Route path="/feedbackform" element={<FeedbackForm />} />
     </Routes>
     </>
   )
