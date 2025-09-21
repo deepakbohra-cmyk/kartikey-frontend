@@ -1,23 +1,3 @@
-/*
-React + Tailwind login page with: email/password form + Google OAuth 2.0 button
-
-How to use:
-1) This is a single-file React component (default export). Drop into a React app (Create React App, Vite, Next.js page component). Make sure Tailwind is configured in your project.
-
-2) Backend endpoints (example expectations):
-   - POST /api/auth/login        -> accepts { email, password } -> returns { ok: true, token } or { ok:false, error }
-   - GET  /api/auth/google       -> starts Google OAuth 2.0 redirect (server-side)
-   - GET  /api/auth/google/callback -> OAuth redirect URI handled server-side
-
-   You can implement server-side with Passport.js, NextAuth (Next.js), or any OAuth2 library. Set environment variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, COOKIE_SECRET, etc.
-
-3) If you want a purely client-side OAuth popup (implicit/PKCE), you'll need additional client flow with Google's OAuth endpoints — this example assumes a server-side flow that begins at GET /api/auth/google.
-
-4) The component calls fetch() to the example endpoints. Adapt the URLs to your backend.
-
----------------------------------------------------------------
-*/
-
 import React, { useState } from 'react';
 
 export default function LoginPage({ onLoginSuccess } = {}) {

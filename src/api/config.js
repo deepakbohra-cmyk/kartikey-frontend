@@ -9,13 +9,31 @@ export const API_CONFIG = {
 };
 
 export const apiClient = axios.create({
-    baseURL : API_CONFIG.BASE_URL,
-    timeout : API_CONFIG.TIMEOUT,
-    headers : API_CONFIG.HEADERS    
-})
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.TIMEOUT,
+  headers: API_CONFIG.HEADERS,
+});
 
 export const API_ENDPOINTS = {
-    SHEET :{
-        
-    }
-}
+  AUTH: {
+    LOGIN: "/auth/login",
+    LOGOUT: "/auth/logout",        
+    VERIFY_TOKEN: "/auth/refresh",
+  },
+  L1TEAM: {
+    CREATE: "/l1team",             
+  },
+  USER: {
+    ALLUSER: "/user/alluser",
+    ADD: "/user/add",
+    EDIT: (id) => `/user/edit/${id}`,
+    DELETE: (id) => `/user/delete/${id}`,
+  },
+  QCTEAM: {
+    GETFORMS: "/qcteam",
+    GETFORM: (gid) => `/qcteam/gid?gid=${gid}`, 
+  },
+  FEEDBACK: {
+    CREATE: "/feedback",
+  },
+};
