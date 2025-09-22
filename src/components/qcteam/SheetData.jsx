@@ -13,6 +13,7 @@ const SheetData = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [copiedText, setCopiedText] = useState(""); // State to track copied text
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -125,6 +126,26 @@ const SheetData = () => {
     };
     return colors[decision] || "bg-gray-100 text-gray-800";
   };
+  //copy function
+    useEffect(() => {
+  const handleMouseUp = () => {
+    const selection = window.getSelection();
+    if (!selection) return;
+
+    const selectedText = selection.toString();
+
+    // Check if the selection is inside a gid cell
+    const parent = selection.anchorNode?.parentElement;
+    if (parent?.classList.contains("copyable-gid") && selectedText) {
+      navigator.clipboard.writeText(selectedText).then(() => {
+        setCopiedText(selectedText); // show ✔ Copied!
+      });
+    }
+  };
+
+  document.addEventListener("mouseup", handleMouseUp);
+  return () => document.removeEventListener("mouseup", handleMouseUp);
+}, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -182,6 +203,7 @@ const SheetData = () => {
           filteredData={paginatedData}
           formatDecision={(d) => d}
           getDecisionColor={getDecisionColor}
+          copiedText={copiedText}
         />
 
         {/* Pagination */}

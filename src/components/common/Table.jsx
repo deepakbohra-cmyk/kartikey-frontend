@@ -107,6 +107,9 @@ const Table = ({ filteredData, formatDecision, getDecisionColor }) => {
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-mono">
                   {row.gid}
+                  {copiedText === row.gid && (
+                    <span className="ml-2 text-green-600 text-xs">✔ Copied!</span>
+                  )}
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap">
                   <span
