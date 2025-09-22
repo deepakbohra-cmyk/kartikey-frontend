@@ -2,37 +2,108 @@
 import React, { useState, useEffect } from "react";
 import Table from "../common/Table";
 import Pagination from "../common/Pagination";
-import { sampleData } from "../constants/Sample";
+import FilterControls from "../common/FilterControls";
+import { qcTeamAPI } from "../../api/qcTeamAPI";
 
 const SheetData = () => {
   const [data, setData] = useState([]);
   const [paginatedData, setPaginatedData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    email: '',
+    workType: '',
+    gid: '',
+    decision: '',
+    fromDate: '',
+    toDate: ''
+  });
+  
+  const [appliedFilters, setAppliedFilters] = useState({
+    email: '',
+    workType: '',
+    gid: '',
+    decision: '',
+    fromDate: '',
+    toDate: ''
+  });
 
-  // Load data
+  // Fetch data from API
+  const fetchData = async (page = 0, size = 10, filterParams = {}) => {
+    setIsLoading(true);
+    try {
+      const params = {
+        page,
+        size,
+        ...filterParams
+      };
+      
+      // Remove empty values
+      Object.keys(params).forEach(key => {
+        if (params[key] === '' || params[key] === null || params[key] === undefined) {
+          delete params[key];
+        }
+      });
+
+      const response = await qcTeamAPI.getForms(params);
+      setData(response);
+      setPaginatedData(response);
+      setTotalItems(response.length); // You might want to get total count from backend
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setData([]);
+      setPaginatedData([]);
+      setTotalItems(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initial data load
   useEffect(() => {
-    setData(sampleData);
-  }, []);
+    fetchData(currentPage - 1, rowsPerPage, appliedFilters);
+  }, [currentPage, rowsPerPage, appliedFilters]);
 
-  // Apply pagination whenever page or rows change
-  useEffect(() => {
-    applyPagination(data, currentPage, rowsPerPage);
-  }, [data, currentPage, rowsPerPage]);
+  // Handle filter changes
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterName]: value
+    }));
+  };
 
-  const applyPagination = (allData, page, perPage) => {
-    const startIndex = (page - 1) * perPage;
-    const endIndex = startIndex + perPage;
-    setPaginatedData(allData.slice(startIndex, endIndex));
+  // Apply filters
+  const handleApplyFilters = () => {
+    setAppliedFilters({ ...filters });
+    setCurrentPage(1); // Reset to first page when applying filters
+  };
+
+  // Clear filters
+  const handleClearFilters = () => {
+    const clearedFilters = {
+      email: '',
+      workType: '',
+      gid: '',
+      decision: '',
+      fromDate: '',
+      toDate: ''
+    };
+    setFilters(clearedFilters);
+    setAppliedFilters(clearedFilters);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  const totalPages = Math.ceil(data.length / rowsPerPage);
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage + 1;
-  const endIndex = Math.min(currentPage * rowsPerPage, data.length);
+  const endIndex = Math.min(currentPage * rowsPerPage, totalItems);
 
   const getDecisionColor = (decision) => {
     const colors = {
@@ -73,6 +144,23 @@ const SheetData = () => {
           </div>
         </div>
 
+        {/* Filter Controls */}
+        <FilterControls
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onApplyFilters={handleApplyFilters}
+          onClearFilters={handleClearFilters}
+          isLoading={isLoading}
+        />
+
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+            <span className="ml-2 text-gray-600">Loading...</span>
+          </div>
+        )}
+
         {/* Table */}
         <Table
           filteredData={paginatedData}
@@ -86,7 +174,7 @@ const SheetData = () => {
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
-            totalItems={data.length}
+            totalItems={totalItems}
             itemsPerPage={rowsPerPage}
             startIndex={startIndex}
             endIndex={endIndex}

@@ -1,13 +1,43 @@
+// qcTeamAPI.js
 import { apiClient, API_ENDPOINTS } from "./config";
 
 export const qcTeamAPI = {
-  getForms: async (params) => {
-    const response = await apiClient.get(API_ENDPOINTS.QCTEAM.GETFORMS, { params });
-    return response.data;
+  getForms: async (params = {}) => {
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.QCTEAM.GETFORMS, { 
+        params: {
+          ...params,
+          // Convert dates to proper format if they exist
+          ...(params.fromDate && { fromDate: params.fromDate }),
+          ...(params.toDate && { toDate: params.toDate }),
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+      throw error;
+    }
   },
 
   getFormByGid: async (gid) => {
-    const response = await apiClient.get(API_ENDPOINTS.QCTEAM.GETFORM(gid));
-    return response.data;
+    try {
+      const response = await apiClient.get(API_ENDPOINTS.QCTEAM.GETFORM(gid));
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching form by GID:', error);
+      throw error;
+    }
+  },
+
+  searchByGid: async (gid) => {
+    try {
+      const response = await apiClient.get(`${API_ENDPOINTS.QCTEAM.GETFORMS}/gid`, {
+        params: { gid }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error searching by GID:', error);
+      throw error;
+    }
   },
 };
