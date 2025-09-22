@@ -1,9 +1,17 @@
 import React from 'react'
 
-function Loding() {
+function Loading() {
   return (
-    <div>Loding</div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="text-center">
+        {/* Spinner */}
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        
+        {/* Loading text */}
+        <p className="text-gray-600 text-lg font-medium">Loading...</p>
+      </div>
+    </div>
   )
 }
 
-export default Loding
+export default Loading

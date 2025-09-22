@@ -1,18 +1,21 @@
-import { useLocation } from 'react-router-dom'
-import AppRoutes from './routes/AppRoutes'
-import Navbar from './components/common/Navbar'
+import { useLocation } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
+import Navbar from "./components/common/Navbar";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
-  const location = useLocation()
+  const location = useLocation();
   // const hideNavbarRoutes = ['/l1form','/feedbackform', '/login']
-  const hideNavbarRoutes = ['/login']
+  const hideNavbarRoutes = ["/login"];
 
   return (
     <>
-      {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
-      <AppRoutes />
+      <AuthProvider>
+        {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
+        <AppRoutes />
+      </AuthProvider>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

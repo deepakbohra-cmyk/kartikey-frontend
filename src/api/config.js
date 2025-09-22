@@ -14,6 +14,14 @@ export const apiClient = axios.create({
   headers: API_CONFIG.HEADERS,
 });
 
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("authToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export const API_ENDPOINTS = {
   AUTH: {
     LOGIN: "/auth/login",
@@ -28,6 +36,7 @@ export const API_ENDPOINTS = {
     ADD: "/user/add",
     EDIT: (id) => `/user/edit/${id}`,
     DELETE: (id) => `/user/delete/${id}`,
+    SEARCH: "/users/search",
   },
   QCTEAM: {
     GETFORMS: "/qcteam",

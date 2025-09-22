@@ -12,7 +12,20 @@ export const authAPI = {
   },
 
   getUserData: async () => {
-    const response = await apiClient.get(API_ENDPOINTS.AUTH.VERIFY_TOKEN);
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      throw new Error("No auth token found");
+    }
+
+    const response = await apiClient.post(
+      API_ENDPOINTS.AUTH.VERIFY_TOKEN,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
     return response.data;
   },
 };

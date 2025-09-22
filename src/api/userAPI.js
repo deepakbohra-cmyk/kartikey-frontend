@@ -20,4 +20,11 @@ export const userAPI = {
     const response = await apiClient.delete(API_ENDPOINTS.USER.DELETE(id));
     return response.data;
   },
+
+  searchUsers: async (query) => {
+    const response = await apiClient.get(
+      `${API_ENDPOINTS.USER.SEARCH}?q=${encodeURIComponent(query)}`
+    );
+    return response.data;
+  },
 };

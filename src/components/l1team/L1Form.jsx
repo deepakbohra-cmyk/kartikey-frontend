@@ -13,7 +13,6 @@ const L1Form = () => {
   });
   const [submitted, setSubmitted] = useState(false);
 
-  // Initialize timestamp once on mount
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -21,7 +20,6 @@ const L1Form = () => {
     }));
   }, []);
 
-  // Sync email into formData only if checkbox is checked and email is valid
   useEffect(() => {
     if (isChecked && isValidEmail(email)) {
       setFormData((prev) => ({
@@ -99,17 +97,6 @@ const L1Form = () => {
     }, 2000);
   };
 
-  // const handleClear = () => {
-  //   setFormData({
-  //     timestamp: new Date().toLocaleString(),
-  //     workType: "",
-  //     email: "",
-  //     gid: "",
-  //     decision: "",
-  //   });
-  //   setIsChecked(false);
-  // };
-
   if (submitted) {
     return (
       <div className="min-h-screen bg-purple-50 flex items-center justify-center">
@@ -125,7 +112,6 @@ const L1Form = () => {
 
   return (
     <div className="min-h-screen bg-purple-50 py-8 px-4">
-      {/* <div className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow"> */}
         <div className="max-w-2xl mx-auto mt-13 bg-white rounded-lg border-t-4 border-purple-600 shadow-sm">
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
             <h1 className="text-3xl font-normal text-gray-800 mb-6">
@@ -200,13 +186,6 @@ const L1Form = () => {
             </div>
 
             <div className="flex justify-center pt-6">
-              {/* <button
-                type="button"
-                onClick={handleClear}
-                className="px-6 py-2 text-purple-600 border border-purple-600 rounded-md hover:bg-purple-50 focus:outline-none"
-              >
-                Clear form
-              </button> */}
               <button
                 type="submit"
                 className={`flex items-center px-8 py-2 rounded-md text-white cursor-pointer ${
@@ -214,13 +193,11 @@ const L1Form = () => {
                 }`}
                 disabled={!isChecked}
               >
-                {/* <Send className="w-4 h-4 mr-2" /> */}
                 Submit
               </button>
             </div>
           </form>
         </div>
-      {/* </div> */}
     </div>
   );
 };
