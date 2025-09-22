@@ -12,6 +12,7 @@ const SheetData = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -80,6 +81,7 @@ const SheetData = () => {
   const handleApplyFilters = () => {
     setAppliedFilters({ ...filters });
     setCurrentPage(1); // Reset to first page when applying filters
+    setShowFilters(false);
   };
 
   // Clear filters
@@ -130,7 +132,7 @@ const SheetData = () => {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-900">Data Overview</h1>
-          <div className="flex items-center space-x-2">
+          <div className="pl-294 space-x-2 relative">
             <select
               value={rowsPerPage}
               onChange={(e) => setRowsPerPage(parseInt(e.target.value))}
@@ -142,16 +144,30 @@ const SheetData = () => {
               <option value={50}>50 rows</option>
             </select>
           </div>
+          {/* Filter Controls */} {/* Filter Button */}
+        <div
+          className="space-x-2 relative">
+        <button
+          onClick={() => setShowFilters((prev) => !prev)}
+          className="px-4 py-1 bg-purple-500 text-white rounded-md text-sm hover:bg-purple-800"
+        >
+          Filters
+        </button>
+        {/* Filter Panel (dropdown style) */}
+        {showFilters && (
+          <div className="absolute top-full right-0 mt-2 z-20 w-180 bg-white border border-gray-300 shadow-lg rounded-lg p-4">
+            <FilterControls
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onApplyFilters={handleApplyFilters}
+              onClearFilters={handleClearFilters}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
+        </div>
         </div>
 
-        {/* Filter Controls */}
-        <FilterControls
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onApplyFilters={handleApplyFilters}
-          onClearFilters={handleClearFilters}
-          isLoading={isLoading}
-        />
 
         {/* Loading Indicator */}
         {isLoading && (
