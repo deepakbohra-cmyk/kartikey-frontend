@@ -19,7 +19,7 @@ function AppRoutes() {
         <Route path="/gid" element={<GidSearch />} />
         <Route path="/l1form" element={<L1Form />} />
         <Route path="/sheetdata" element={<SheetData />} />
-        <Route path="/feedbackform/:id" element={<FeedbackForm />} />
+        <Route path="/feedbackform" element={<FeedbackForm />} />
         <Route path="/feedback" element={<FeedbackList />} />
         <Route path="/team" element={<Team />} />
         <Route path="/oauth2/redirect" element={<OAuth2Redirect />} />

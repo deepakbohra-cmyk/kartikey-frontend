@@ -1,20 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Search, Filter, Download, MoreVertical } from "lucide-react";
 import Pagination from "./Pagination";
 
 function GlobalTable({ 
   headers = [], 
   data = [], 
   renderRow,
-  title,
-  subtitle,
-  searchable = false,
-  searchPlaceholder = "Search...",
-  onSearch,
-  filterable = false,
-  onFilter,
-  exportable = false,
-  onExport,
   pagination = false,
   currentPage = 1,
   totalPages = 1,
@@ -26,7 +16,6 @@ function GlobalTable({
   emptyMessage = "No data available",
   emptySubMessage = "Try adjusting your search or filter criteria",
   className = "",
-  headerActions,
   rowActions
 }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,66 +38,6 @@ function GlobalTable({
 
   return (
     <div className={`bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden ${className}`}>
-      {/* Table Header Section */}
-      {(title || subtitle || searchable || filterable || exportable || headerActions) && (
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            {/* Title and Subtitle */}
-            <div className="flex-1">
-              {title && (
-                <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-              )}
-              {subtitle && (
-                <p className="mt-1 text-sm text-gray-600">{subtitle}</p>
-              )}
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              {/* Search */}
-              {searchable && (
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder={searchPlaceholder}
-                    value={searchQuery}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  />
-                </div>
-              )}
-
-              {/* Filter */}
-              {filterable && (
-                <button
-                  onClick={onFilter}
-                  className="inline-flex items-center p-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  title="Filter"
-                >
-                  <Filter className="h-4 w-4" />
-                </button>
-              )}
-
-              {/* Export */}
-              {exportable && (
-                <button
-                  onClick={onExport}
-                  className="inline-flex items-center p-2 border border-gray-300 rounded-md shadow-sm bg-white text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                  title="Export"
-                >
-                  <Download className="h-4 w-4" />
-                </button>
-              )}
-
-              {/* Custom Header Actions */}
-              {headerActions}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Table Container */}
       <div className="overflow-x-auto">
