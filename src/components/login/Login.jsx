@@ -1,11 +1,14 @@
+// LoginPage.jsx
 import React, { useState } from "react";
-import { useAuth } from "../../contexts/AuthContext"
+import { useAuth } from "../../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-export default function LoginPage({ onLoginSuccess } = {}) {
+export default function LoginPage() {
   const { login, error: authError, loading: authLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [localError, setLocalError] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,15 +18,15 @@ export default function LoginPage({ onLoginSuccess } = {}) {
       if (!userData) {
         throw new Error("Invalid credentials");
       }
-      if (onLoginSuccess) onLoginSuccess(userData);
+      navigate("/dashboard"); // ✅ redirect after login
     } catch (err) {
       setLocalError(err.message || "Unexpected error");
     }
   };
 
   const startGoogleOAuth = () => {
-  window.location.href = "http://localhost:8080/oauth2/authorization/google";
-};
+    window.location.href = "http://localhost:8080/oauth2/authorization/google";
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
@@ -33,6 +36,7 @@ export default function LoginPage({ onLoginSuccess } = {}) {
           Welcome back — sign in to continue.
         </p>
 
+        {/* Google OAuth */}
         <button
           onClick={startGoogleOAuth}
           className="w-full flex items-center justify-center gap-3 py-2 px-4 mb-4 border rounded-xl hover:shadow-sm transition-shadow"
@@ -64,6 +68,7 @@ export default function LoginPage({ onLoginSuccess } = {}) {
           <span className="text-sm font-medium">Continue with Google</span>
         </button>
 
+        {/* Divider */}
         <div className="relative my-4">
           <div className="absolute inset-0 flex items-center" aria-hidden>
             <div className="w-full border-t border-gray-200"></div>
@@ -75,6 +80,7 @@ export default function LoginPage({ onLoginSuccess } = {}) {
           </div>
         </div>
 
+        {/* Email Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <label className="block">
             <span className="text-sm font-medium text-gray-700">Email</span>
@@ -91,12 +97,6 @@ export default function LoginPage({ onLoginSuccess } = {}) {
           <label className="block">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-700">Password</span>
-              <a
-                href="#"
-                className="text-sm text-indigo-600 hover:underline"
-              >
-                Forgot?
-              </a>
             </div>
             <input
               type="password"

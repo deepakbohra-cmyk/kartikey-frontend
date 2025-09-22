@@ -1,8 +1,6 @@
-import React from "react";
 import { Mail, User, Hash, Clock, UserCheck, Calendar, Search } from "lucide-react";
-import { decisions } from "../constants/Sample";
 
-const Table = ({ filteredData, filters, handleFilterChange, formatDecision, getDecisionColor }) => {
+const Table = ({ filteredData, formatDecision, getDecisionColor }) => {
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
