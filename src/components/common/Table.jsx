@@ -80,7 +80,7 @@ function Table({
               <tr 
                 key={row.id || row._id || rowIndex} 
                 className={`
-                  ${hoverable ? 'hover:bg-gray-50' : ''} 
+                  ${hoverable ? 'hover:bg-gray-100' : ''} 
                   ${striped && rowIndex % 2 === 1 ? 'bg-gray-50' : ''} 
                   ${onRowClick ? 'cursor-pointer' : ''}
                   transition-colors

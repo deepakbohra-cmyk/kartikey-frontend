@@ -39,7 +39,6 @@ function Dashboard() {
       email: "deepak@example.com",
       filled: 120,
       error: 3,
-      status: "active",
       lastLogin: "2024-01-15",
     },
     {
@@ -49,7 +48,6 @@ function Dashboard() {
       email: "aarav@example.com",
       filled: 98,
       error: 5,
-      status: "active",
       lastLogin: "2024-01-14",
     },
     {
@@ -59,7 +57,6 @@ function Dashboard() {
       email: "neha@example.com",
       filled: 130,
       error: 1,
-      status: "active",
       lastLogin: "2024-01-15",
     },
     {
@@ -69,7 +66,6 @@ function Dashboard() {
       email: "rohit@example.com",
       filled: 85,
       error: 2,
-      status: "away",
       lastLogin: "2024-01-13",
     },
     {
@@ -79,7 +75,6 @@ function Dashboard() {
       email: "priya@example.com",
       filled: 145,
       error: 0,
-      status: "active",
       lastLogin: "2024-01-15",
     },
     {
@@ -89,7 +84,6 @@ function Dashboard() {
       email: "amit@example.com",
       filled: 92,
       error: 4,
-      status: "inactive",
       lastLogin: "2024-01-10",
     },
     {
@@ -99,7 +93,6 @@ function Dashboard() {
       email: "kavya@example.com",
       filled: 110,
       error: 2,
-      status: "active",
       lastLogin: "2024-01-15",
     },
     {
@@ -109,7 +102,6 @@ function Dashboard() {
       email: "suresh@example.com",
       filled: 78,
       error: 6,
-      status: "active",
       lastLogin: "2024-01-14",
     },
   ];
@@ -201,84 +193,7 @@ function Dashboard() {
         </div>
       )
     },
-    {
-      key: 'status',
-      label: 'Status',
-      icon: Activity,
-      render: (value) => {
-        const statusConfig = {
-          active: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Active' },
-          away: { color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle, label: 'Away' },
-          inactive: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Inactive' }
-        };
-        
-        const config = statusConfig[value] || statusConfig.inactive;
-        const IconComponent = config.icon;
-        
-        return (
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
-            <IconComponent className="w-3 h-3 mr-1" />
-            {config.label}
-          </span>
-        );
-      }
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      icon: MoreHorizontal,
-      minWidth: '120px',
-      cellClassName: 'relative',
-      render: (value, row, header, rowIndex) => (
-        <div className="relative">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleToggleActionMenu(rowIndex);
-            }}
-            className="inline-flex items-center p-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
-          >
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-          
-          {openActionMenu === rowIndex && (
-            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
-              <div className="py-1">
-                <button
-                  onClick={() => handleAction('view', row)}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <Eye className="w-4 h-4 mr-3" />
-                  View Profile
-                </button>
-                <button
-                  onClick={() => handleAction('edit', row)}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <Edit className="w-4 h-4 mr-3" />
-                  Edit User
-                </button>
-                <button
-                  onClick={() => handleAction('performance', row)}
-                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                >
-                  <BarChart3 className="w-4 h-4 mr-3" />
-                  View Performance
-                </button>
-                <hr className="my-1" />
-                <button
-                  onClick={() => handleAction('deactivate', row)}
-                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                >
-                  <UserX className="w-4 h-4 mr-3" />
-                  Deactivate
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )
-    }
+
   ];
 
   // Filter data based on search query and filters
