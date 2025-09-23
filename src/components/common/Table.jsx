@@ -1,6 +1,6 @@
 import { Mail, User, Hash, Clock, UserCheck, Calendar, Search } from "lucide-react";
 
-const Table = ({ filteredData, formatDecision, getDecisionColor }) => {
+const Table = ({ filteredData, formatDecision, getDecisionColor , copiedText }) => {
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
