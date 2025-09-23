@@ -1,12 +1,35 @@
 import React, { useState, useMemo } from "react";
-import { Search, Filter, Download, TrendingUp, TrendingDown, Users, AlertCircle, CheckCircle } from "lucide-react";
-import GlobalTable from "../common/GlobalTable";
-import Pagination from "../common/Pagination";
+import { 
+  Search, 
+  Filter, 
+  Download, 
+  TrendingUp, 
+  TrendingDown, 
+  Users, 
+  AlertCircle, 
+  CheckCircle,
+  User,
+  Mail,
+  BarChart3,
+  XCircle,
+  Activity,
+  Calendar,
+  MoreHorizontal,
+  Eye,
+  Edit,
+  UserX
+} from "lucide-react";
+import Table from "../common/Table";
 
 function Dashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [teamFilter, setTeamFilter] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
+  const [openActionMenu, setOpenActionMenu] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const dashboardData = [
     {
@@ -91,18 +114,199 @@ function Dashboard() {
     },
   ];
 
-  const headers = ["Name", "Team", "Email", "Filled", "Errors", "Status"];
+  // Define table headers for GlobalTable
+  const tableHeaders = [
+    {
+      key: 'name',
+      label: 'Name',
+      icon: User,
+      minWidth: '200px',
+      render: (value, row) => (
+        <div className="flex items-center">
+          <div className="flex-shrink-0 h-10 w-10">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
+              <span className="text-sm font-medium text-white">
+                {value.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          </div>
+          <div className="ml-4">
+            <div className="text-sm font-medium text-gray-900">{value}</div>
+            <div className="text-xs text-gray-500">
+              Last login: {new Date(row.lastLogin).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      key: 'team',
+      label: 'Team',
+      icon: Users,
+      render: (value) => {
+        const teamColors = {
+          Frontend: 'bg-blue-100 text-blue-800',
+          Backend: 'bg-purple-100 text-purple-800',
+          QA: 'bg-green-100 text-green-800',
+          DevOps: 'bg-orange-100 text-orange-800',
+          Design: 'bg-pink-100 text-pink-800'
+        };
+        
+        return (
+          <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${teamColors[value] || 'bg-gray-100 text-gray-800'}`}>
+            {value}
+          </span>
+        );
+      }
+    },
+    {
+      key: 'email',
+      label: 'Email',
+      icon: Mail,
+      minWidth: '200px',
+      render: (value) => (
+        <div className="flex items-center">
+          <Mail className="w-4 h-4 mr-2 text-gray-400" />
+          <span className="text-sm text-gray-600">{value}</span>
+        </div>
+      )
+    },
+    {
+      key: 'filled',
+      label: 'Forms Filled',
+      icon: BarChart3,
+      align: 'center',
+      render: (value, row) => (
+        <div className="flex items-center justify-center">
+          <div className="text-sm font-semibold text-green-600">{value}</div>
+          <TrendingUp className="ml-1 h-3 w-3 text-green-400" />
+        </div>
+      )
+    },
+    {
+      key: 'error',
+      label: 'Errors',
+      icon: AlertCircle,
+      align: 'center',
+      render: (value) => (
+        <div className="flex items-center justify-center">
+          <div className={`text-sm font-semibold ${value > 3 ? 'text-red-600' : value > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+            {value}
+          </div>
+          {value > 3 ? (
+            <AlertCircle className="ml-1 h-3 w-3 text-red-400" />
+          ) : value === 0 ? (
+            <CheckCircle className="ml-1 h-3 w-3 text-green-400" />
+          ) : null}
+        </div>
+      )
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      icon: Activity,
+      render: (value) => {
+        const statusConfig = {
+          active: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Active' },
+          away: { color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle, label: 'Away' },
+          inactive: { color: 'bg-red-100 text-red-800', icon: XCircle, label: 'Inactive' }
+        };
+        
+        const config = statusConfig[value] || statusConfig.inactive;
+        const IconComponent = config.icon;
+        
+        return (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
+            <IconComponent className="w-3 h-3 mr-1" />
+            {config.label}
+          </span>
+        );
+      }
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      icon: MoreHorizontal,
+      minWidth: '120px',
+      cellClassName: 'relative',
+      render: (value, row, header, rowIndex) => (
+        <div className="relative">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleActionMenu(rowIndex);
+            }}
+            className="inline-flex items-center p-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+          
+          {openActionMenu === rowIndex && (
+            <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
+              <div className="py-1">
+                <button
+                  onClick={() => handleAction('view', row)}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Eye className="w-4 h-4 mr-3" />
+                  View Profile
+                </button>
+                <button
+                  onClick={() => handleAction('edit', row)}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Edit className="w-4 h-4 mr-3" />
+                  Edit User
+                </button>
+                <button
+                  onClick={() => handleAction('performance', row)}
+                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <BarChart3 className="w-4 h-4 mr-3" />
+                  View Performance
+                </button>
+                <hr className="my-1" />
+                <button
+                  onClick={() => handleAction('deactivate', row)}
+                  className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                >
+                  <UserX className="w-4 h-4 mr-3" />
+                  Deactivate
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )
+    }
+  ];
 
-  // Filter data based on search query
+  // Filter data based on search query and filters
   const filteredData = useMemo(() => {
-    if (!searchQuery.trim()) return dashboardData;
-    
-    return dashboardData.filter(item =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.team.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [searchQuery]);
+    let filtered = dashboardData;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const searchLower = searchQuery.toLowerCase();
+      filtered = filtered.filter(item =>
+        item.name.toLowerCase().includes(searchLower) ||
+        item.team.toLowerCase().includes(searchLower) ||
+        item.email.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Status filter
+    if (statusFilter) {
+      filtered = filtered.filter(item => item.status === statusFilter);
+    }
+
+    // Team filter
+    if (teamFilter) {
+      filtered = filtered.filter(item => item.team === teamFilter);
+    }
+
+    return filtered;
+  }, [searchQuery, statusFilter, teamFilter]);
 
   // Paginate data
   const paginatedData = useMemo(() => {
@@ -131,7 +335,7 @@ function Dashboard() {
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page) => {
@@ -144,134 +348,326 @@ function Dashboard() {
   };
 
   const handleExport = () => {
-    // Simple CSV export
     const csvContent = [
-      headers.join(','),
+      ['Name', 'Team', 'Email', 'Filled', 'Errors', 'Status', 'Last Login'].join(','),
       ...filteredData.map(row => 
-        `${row.name},${row.team},${row.email},${row.filled},${row.error},${row.status}`
+        `"${row.name}","${row.team}","${row.email}","${row.filled}","${row.error}","${row.status}","${row.lastLogin}"`
       )
     ].join('\n');
     
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'dashboard-data.csv';
+    a.download = `dashboard-data-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
-  const getStatusBadge = (status) => {
-    const statusConfig = {
-      active: { color: 'bg-green-100 text-green-800', icon: CheckCircle, label: 'Active' },
-      away: { color: 'bg-yellow-100 text-yellow-800', icon: AlertCircle, label: 'Away' },
-      inactive: { color: 'bg-red-100 text-red-800', icon: AlertCircle, label: 'Inactive' }
-    };
-    
-    const config = statusConfig[status] || statusConfig.inactive;
-    const IconComponent = config.icon;
-    
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}>
-        <IconComponent className="w-3 h-3 mr-1" />
-        {config.label}
-      </span>
-    );
+  const clearFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('');
+    setTeamFilter('');
+    setShowFilters(false);
+    setCurrentPage(1);
   };
 
-  const getTeamBadge = (team) => {
-    const teamColors = {
-      Frontend: 'bg-blue-100 text-blue-800',
-      Backend: 'bg-purple-100 text-purple-800',
-      QA: 'bg-green-100 text-green-800',
-      DevOps: 'bg-orange-100 text-orange-800',
-      Design: 'bg-pink-100 text-pink-800'
-    };
-    
-    return (
-      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${teamColors[team] || 'bg-gray-100 text-gray-800'}`}>
-        {team}
-      </span>
-    );
+  const handleToggleActionMenu = (rowIndex) => {
+    setOpenActionMenu(openActionMenu === rowIndex ? null : rowIndex);
   };
+
+  const handleAction = (action, row) => {
+    setOpenActionMenu(null);
+    
+    switch (action) {
+      case 'view':
+        alert(`Viewing profile for: ${row.name}`);
+        break;
+      case 'edit':
+        alert(`Editing user: ${row.name}`);
+        break;
+      case 'performance':
+        alert(`Viewing performance for: ${row.name}`);
+        break;
+      case 'deactivate':
+        if (window.confirm(`Are you sure you want to deactivate ${row.name}?`)) {
+          alert(`Deactivating user: ${row.name}`);
+        }
+        break;
+      default:
+        console.log('Unknown action:', action);
+    }
+  };
+
+  // Close action menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = () => setOpenActionMenu(null);
+    if (openActionMenu !== null) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openActionMenu]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        {/* Enhanced Table */}
-        <GlobalTable
-          title="Team Performance"
-          subtitle={`Showing ${filteredData.length} of ${dashboardData.length} team members`}
-          headers={headers}
-          data={paginatedData}
-          searchable={true}
-          searchPlaceholder="Search by name, team, or email..."
-          onSearch={handleSearch}
-          exportable={true}
-          onExport={handleExport}
-          pagination={true}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={filteredData.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-          onPageSizeChange={handlePageSizeChange}
-          emptyMessage="No team members found"
-          emptySubMessage="Try adjusting your search criteria"
-          renderRow={(row) => (
-            <tr key={row.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 h-8 w-8">
-                    <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-                      <span className="text-sm font-medium text-gray-700">
-                        {row.name.charAt(0)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <div className="text-sm font-medium text-gray-900">
-                      {row.name}
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {getTeamBadge(row.team)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                {row.email}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
-                  <div className="text-sm font-semibold text-green-600">
-                    {row.filled}
-                  </div>
-                  <TrendingUp className="ml-1 h-3 w-3 text-green-400" />
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex items-center">
-                  <div className={`text-sm font-semibold ${row.error > 3 ? 'text-red-600' : 'text-yellow-600'}`}>
-                    {row.error}
-                  </div>
-                  {row.error > 3 && <AlertCircle className="ml-1 h-3 w-3 text-red-400" />}
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                {getStatusBadge(row.status)}
-              </td>
-            </tr>
-          )}
-          headerActions={
-            <div className="flex items-center gap-2">
-              <button className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                <Filter className="h-4 w-4 mr-2" />
-                Filter
+        {/* Header */}
+        <div className="mb-8">
+          <div className="md:flex md:items-center md:justify-between">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+                Team Performance Dashboard
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Monitor team productivity and performance metrics
+              </p>
+            </div>
+            <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+              </button>
+              <button
+                onClick={handleExport}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
               </button>
             </div>
-          }
+          </div>
+
+          {/* Stats Cards */}
+          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <Users className="h-6 w-6 text-blue-400" />
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Total Users</dt>
+                      <dd className="text-lg font-medium text-gray-900">{stats.totalUsers}</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <CheckCircle className="h-6 w-6 text-green-400" />
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Active Users</dt>
+                      <dd className="text-lg font-medium text-gray-900">{stats.activeUsers}</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <BarChart3 className="h-6 w-6 text-purple-400" />
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Total Forms</dt>
+                      <dd className="text-lg font-medium text-gray-900">{stats.totalFilled}</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="p-5">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0">
+                    <AlertCircle className="h-6 w-6 text-red-400" />
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Error Rate</dt>
+                      <dd className="text-lg font-medium text-gray-900">{stats.errorRate}%</dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-4">
+          {/* Search Bar */}
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by name, team, or email..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+            />
+          </div>
+
+          {/* Filters Panel */}
+          {showFilters && (
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="away">Away</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Team</label>
+                  <select
+                    value={teamFilter}
+                    onChange={(e) => setTeamFilter(e.target.value)}
+                    className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                  >
+                    <option value="">All Teams</option>
+                    <option value="Frontend">Frontend</option>
+                    <option value="Backend">Backend</option>
+                    <option value="QA">QA</option>
+                    <option value="DevOps">DevOps</option>
+                    <option value="Design">Design</option>
+                  </select>
+                </div>
+                
+                <div className="flex items-end">
+                  <button
+                    onClick={clearFilters}
+                    className="w-full px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Results Summary */}
+        {(searchQuery || statusFilter || teamFilter) && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <Users className="h-5 w-5 text-blue-400" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-800">
+                  <span className="font-medium">{filteredData.length}</span> of {dashboardData.length} team members shown
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Table using GlobalTable */}
+        <Table
+          headers={tableHeaders}
+          data={paginatedData}
+          loading={loading}
+          emptyMessage="No team members found"
+          emptySubMessage="Try adjusting your search criteria or filters"
+          hoverable={true}
+          compact={false}
         />
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-6 bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 rounded-lg shadow-sm">
+            <div className="flex-1 flex justify-between items-center">
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-700">Show</span>
+                <select
+                  value={itemsPerPage}
+                  onChange={(e) => handlePageSizeChange(parseInt(e.target.value))}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                >
+                  <option value={5}>5</option>
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                </select>
+                <span className="text-sm text-gray-700">per page</span>
+              </div>
+              
+              <div className="text-sm text-gray-700">
+                Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredData.length)} of {filteredData.length} results
+              </div>
+              
+              <div className="flex space-x-1">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Previous
+                </button>
+                
+                {[...Array(Math.min(5, totalPages))].map((_, index) => {
+                  let pageNum;
+                  if (totalPages <= 5) {
+                    pageNum = index + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = index + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    pageNum = totalPages - 4 + index;
+                  } else {
+                    pageNum = currentPage - 2 + index;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handlePageChange(pageNum)}
+                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                        pageNum === currentPage
+                          ? 'z-10 bg-purple-50 border-purple-500 text-purple-600'
+                          : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+                
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
