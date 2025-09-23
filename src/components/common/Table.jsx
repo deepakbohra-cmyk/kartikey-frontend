@@ -1,6 +1,6 @@
 import { Mail, User, Hash, Clock, UserCheck, Calendar, Search } from "lucide-react";
 
-const Table = ({ filteredData, formatDecision, getDecisionColor }) => {
+const Table = ({ filteredData, formatDecision, getDecisionColor , copiedText }) => {
   return (
     <div className="bg-white shadow-sm rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
@@ -107,6 +107,9 @@ const Table = ({ filteredData, formatDecision, getDecisionColor }) => {
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-mono">
                   {row.gid}
+                  {copiedText === row.gid && (
+                    <span className="ml-2 text-green-600 text-xs">✔ Copied!</span>
+                  )}
                 </td>
                 <td className="px-4 py-2 whitespace-nowrap">
                   <span
