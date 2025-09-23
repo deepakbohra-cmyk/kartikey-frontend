@@ -1,75 +1,66 @@
 // SheetData.jsx
-import React, { useState, useEffect } from "react";
-import { Mail, User, Hash, Clock, UserCheck, Calendar } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Mail, User, Hash, Clock, UserCheck, Calendar, Download, Filter } from "lucide-react";
 import Table from "../common/Table";
 import Pagination from "../common/Pagination";
-import FilterControls from "../common/FilterControls";
 import { qcTeamAPI } from "../../api/qcTeamAPI";
+import FilterControls from "../common/FilterControls";
+import SearchBar from "../common/SearchBar";
+import Loading from "../common/Loding";
 
 const SheetData = () => {
   const [data, setData] = useState([]);
-  const [paginatedData, setPaginatedData] = useState([]);
+  const [allData, setAllData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalItems, setTotalItems] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [copiedText, setCopiedText] = useState(""); 
-  
-  // Filter states
+
+  // Filters
   const [filters, setFilters] = useState({
-    email: '',
-    workType: '',
-    gid: '',
-    decision: '',
-    fromDate: '',
-    toDate: ''
-  });
-  
-  const [appliedFilters, setAppliedFilters] = useState({
-    email: '',
-    workType: '',
-    gid: '',
-    decision: '',
-    fromDate: '',
-    toDate: ''
+    email: "",
+    workType: "",
+    gid: "",
+    decision: "",
+    fromDate: "",
+    toDate: "",
   });
 
-  // Define table headers for GlobalTable
+  const [appliedFilters, setAppliedFilters] = useState({ ...filters });
+
+  // Table Headers
   const tableHeaders = [
+    { key: "id", label: "ID", icon: Hash },
     {
-      key: 'id',
-      label: 'ID',
-      icon: Hash,
-      className: '',
-      textClassName: 'text-sm font-medium text-gray-900'
-    },
-    {
-      key: 'date',
-      label: 'Date',
+      key: "date",
+      label: "Date",
       icon: Calendar,
-      minWidth: '120px',
-      textClassName: 'text-xs text-gray-500'
+      render: (value) => <span className="text-sm text-gray-700">{value}</span>,
     },
     {
-      key: 'time',
-      label: 'Time',
+      key: "time",
+      label: "Time",
       icon: Clock,
-      minWidth: '100px',
-      textClassName: 'text-xs text-gray-500'
+      render: (value) => <span className="text-sm text-gray-700">{value}</span>,
     },
     {
-      key: 'email',
-      label: 'Email',
+      key: "email",
+      label: "Email",
       icon: Mail,
-      minWidth: '200px',
-      textClassName: 'text-sm text-gray-900'
+      minWidth: "200px",
+      render: (value) => (
+        <div className="flex items-center text-sm text-gray-600">
+          <Mail className="w-4 h-4 mr-2 text-gray-400" />
+          {value}
+        </div>
+      ),
     },
     {
-      key: 'workType',
-      label: 'Work Type',
+      key: "workType",
+      label: "Work Type",
       icon: User,
-      minWidth: '150px',
       render: (value) => (
         <span
           className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
@@ -78,218 +69,217 @@ const SheetData = () => {
               : "bg-green-100 text-green-800"
           }`}
         >
-          {value ? value.charAt(0).toUpperCase() + value.slice(1) : '-'}
+          {value || "-"}
         </span>
-      )
+      ),
     },
     {
-      key: 'gid',
-      label: 'GID',
+      key: "gid",
+      label: "GID",
       icon: Hash,
-      render: (value, row) => (
-        <span className="copyable-gid text-sm text-gray-900 font-mono">
-          {value}
-          {copiedText === value && (
-            <span className="ml-2 text-green-600 text-xs">✓ Copied!</span>
-          )}
-        </span>
-      )
+      render: (value) => (
+        <span className="text-sm font-mono text-gray-900">{value}</span>
+      ),
     },
     {
-      key: 'decision',
-      label: 'Decision',
+      key: "decision",
+      label: "Decision",
       icon: UserCheck,
-      minWidth: '300px',
       render: (value) => (
         <span
-          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getDecisionColor(value)}`}
+          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getDecisionColor(
+            value
+          )}`}
         >
-          {value || '-'}
+          {value || "-"}
         </span>
-      )
-    }
+      ),
+    },
   ];
-
-  // Fetch data from API
-  const fetchData = async (page = 0, size = 10, filterParams = {}) => {
-    setIsLoading(true);
-    try {
-      const params = {
-        page,
-        size,
-        ...filterParams
-      };
-      
-      // Remove empty values
-      Object.keys(params).forEach(key => {
-        if (params[key] === '' || params[key] === null || params[key] === undefined) {
-          delete params[key];
-        }
-      });
-
-      const response = await qcTeamAPI.getForms(params);
-      setData(response);
-      setPaginatedData(response);
-      setTotalItems(response.length); // You might want to get total count from backend
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      setData([]);
-      setPaginatedData([]);
-      setTotalItems(0);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Initial data load
-  useEffect(() => {
-    fetchData(currentPage - 1, rowsPerPage, appliedFilters);
-  }, [currentPage, rowsPerPage, appliedFilters]);
-
-  // Handle filter changes
-  const handleFilterChange = (filterName, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [filterName]: value
-    }));
-  };
-
-  // Apply filters
-  const handleApplyFilters = () => {
-    setAppliedFilters({ ...filters });
-    setCurrentPage(1); // Reset to first page when applying filters
-    setShowFilters(false);
-  };
-
-  // Clear filters
-  const handleClearFilters = () => {
-    const clearedFilters = {
-      email: '',
-      workType: '',
-      gid: '',
-      decision: '',
-      fromDate: '',
-      toDate: ''
-    };
-    setFilters(clearedFilters);
-    setAppliedFilters(clearedFilters);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const totalPages = Math.ceil(totalItems / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage + 1;
-  const endIndex = Math.min(currentPage * rowsPerPage, totalItems);
 
   const getDecisionColor = (decision) => {
     const colors = {
-      'Duplicate': "bg-red-100 text-red-800",
-      'Not Duplicate': "bg-green-100 text-green-800",
-      'Not Sure - Bad Data': "bg-yellow-100 text-yellow-800",
-      'Combination of Duplicate & Not Duplicate': "bg-purple-100 text-purple-800",
-      'Combination of Duplicate & Not Sure': "bg-orange-100 text-orange-800",
-      'On Hold': "bg-gray-100 text-gray-800",
-      'Combination of Not Duplicate & Not Sure': "bg-blue-100 text-blue-800",
-      'Not Duplicate - Variant Data Not Available': "bg-teal-100 text-teal-800",
-      'Not Duplicate - Different Compatibility': "bg-indigo-100 text-indigo-800",
-      'Not Duplicate - Different Warranty': "bg-pink-100 text-pink-800",
-      'Not Duplicate - Attribute Value Not Available': "bg-cyan-100 text-cyan-800",
-      'Unpublish': "bg-red-200 text-red-900",
-      'Combination of Duplicate, Not Duplicate & Not Sure': "bg-gradient-to-r from-red-100 to-green-100 text-gray-800"
+      Duplicate: "bg-red-100 text-red-800",
+      "Not Duplicate": "bg-green-100 text-green-800",
+      "Not Sure - Bad Data": "bg-yellow-100 text-yellow-800",
+      "On Hold": "bg-gray-100 text-gray-800",
     };
     return colors[decision] || "bg-gray-100 text-gray-800";
   };
 
-  //copy function
+  // Fetch data
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await qcTeamAPI.getForms(appliedFilters);
+      setData(response || []);
+      setAllData(response || []);
+    } catch (err) {
+      setError("Failed to load data. Please try again.");
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const handleMouseUp = () => {
-      const selection = window.getSelection();
-      if (!selection) return;
+    fetchData();
+  }, [appliedFilters]);
 
-      const selectedText = selection.toString();
+  // Search
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setData(allData);
+      setCurrentPage(1);
+    } else {
+      const delayDebounce = setTimeout(() => {
+        const filtered = allData.filter((item) =>
+          item.email?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setData(filtered);
+        setCurrentPage(1);
+      }, 400);
+      return () => clearTimeout(delayDebounce);
+    }
+  }, [searchQuery]);
 
-      // Check if the selection is inside a gid cell
-      const parent = selection.anchorNode?.parentElement;
-      if (parent?.classList.contains("copyable-gid") && selectedText) {
-        navigator.clipboard.writeText(selectedText).then(() => {
-          setCopiedText(selectedText); // show ✓ Copied!
-        });
-      }
-    };
+  // Pagination
+  const startIndex = (currentPage - 1) * rowsPerPage + 1;
+  const endIndex = Math.min(currentPage * rowsPerPage, data.length);
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * rowsPerPage;
+    return data.slice(start, start + rowsPerPage);
+  }, [data, currentPage, rowsPerPage]);
 
-    document.addEventListener("mouseup", handleMouseUp);
-    return () => document.removeEventListener("mouseup", handleMouseUp);
-  }, []);
+  const totalPages = Math.ceil(data.length / rowsPerPage);
+
+  // Export CSV
+  const handleExport = () => {
+    const csvContent = [
+      ["ID", "Date", "Time", "Email", "WorkType", "GID", "Decision"].join(","),
+      ...data.map(
+        (row) =>
+          `"${row.id}","${row.date}","${row.time}","${row.email}","${row.workType}","${row.gid}","${row.decision}"`
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sheet-data-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  if (loading && data.length === 0) return <Loading />;
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-9xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-gray-900">Data Overview</h1>
-          <div className="flex items-center space-x-4">
-            {/* Rows per page selector */}
-            <div className="space-x-2 relative">
-              <select
-                value={rowsPerPage}
-                onChange={(e) => setRowsPerPage(parseInt(e.target.value))}
-                className="px-3 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
-              >
-                <option value={5}>5 rows</option>
-                <option value={10}>10 rows</option>
-                <option value={20}>20 rows</option>
-                <option value={50}>50 rows</option>
-              </select>
+        <div className="mb-8">
+          <div className="md:flex md:items-center md:justify-between">
+            {/* Left: Title */}
+            <div className="min-w-0">
+              <h1 className="text-2xl font-bold text-gray-900">Data Overview</h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Showing {paginatedData.length} of {data.length} records
+              </p>
             </div>
-            
-            {/* Filter Controls */}
-            <div className="space-x-2 relative">
+
+            {/* Center: Search Bar */}
+            <div className="flex-1 flex justify-center">
+              <SearchBar searchQuery={searchQuery} onSearch={setSearchQuery} />
+            </div>
+
+            {/* Right: Buttons */}
+            <div className="mt-4 flex md:mt-0 md:ml-4 space-x-2">
               <button
                 onClick={() => setShowFilters((prev) => !prev)}
-                className="px-4 py-1 bg-purple-500 text-white rounded-md text-sm hover:bg-purple-600 transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
               >
+                <Filter className="w-4 h-4 mr-2" />
                 Filters
               </button>
-              {/* Filter Panel (dropdown style) */}
-              {showFilters && (
-                <div className="absolute top-full right-0 mt-2 z-20 w-80 bg-white border border-gray-300 shadow-lg rounded-lg p-4">
-                  <FilterControls
-                    filters={filters}
-                    onFilterChange={handleFilterChange}
-                    onApplyFilters={handleApplyFilters}
-                    onClearFilters={handleClearFilters}
-                    isLoading={isLoading}
-                  />
-                </div>
-              )}
+              <button
+                onClick={handleExport}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </button>
             </div>
           </div>
+
+          {/* Filter dropdown */}
+          {showFilters && (
+            <div className="mt-4 w-full max-w-3xl bg-white border border-gray-200 shadow-md rounded-lg p-4">
+              <FilterControls
+                filters={filters}
+                onFilterChange={(name, value) =>
+                  setFilters((prev) => ({ ...prev, [name]: value }))
+                }
+                onApplyFilters={() => {
+                  setAppliedFilters({ ...filters });
+                  setShowFilters(false);
+                }}
+                onClearFilters={() => {
+                  setFilters({
+                    email: "",
+                    workType: "",
+                    gid: "",
+                    decision: "",
+                    fromDate: "",
+                    toDate: "",
+                  });
+                  setAppliedFilters({
+                    email: "",
+                    workType: "",
+                    gid: "",
+                    decision: "",
+                    fromDate: "",
+                    toDate: "",
+                  });
+                  setShowFilters(false);
+                }}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Table using GlobalTable */}
-        <Table
-          headers={tableHeaders}
-          data={paginatedData}
-          loading={isLoading}
-          emptyMessage="No data available"
-          emptySubMessage="Try adjusting your filters or check back later"
-          hoverable={true}
-          compact={false}
-        />
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+            {error}
+          </div>
+        )}
 
-        {/* Pagination */}
+        <div className="mb-6">
+          <Table
+            headers={tableHeaders}
+            data={paginatedData}
+            loading={loading}
+            emptyMessage="No data available"
+            emptySubMessage="Try adjusting your filters or check back later"
+            hoverable={true}
+            compact={false}
+          />
+        </div>
+
         {totalPages > 1 && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={handlePageChange}
-            totalItems={totalItems}
+            onPageChange={setCurrentPage}
+            totalItems={data.length}
             itemsPerPage={rowsPerPage}
             startIndex={startIndex}
             endIndex={endIndex}
+            onPageSizeChange={(size) => {
+              setRowsPerPage(size);
+              setCurrentPage(1);
+            }}
           />
         )}
       </div>
