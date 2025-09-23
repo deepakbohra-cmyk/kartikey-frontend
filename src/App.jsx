@@ -12,7 +12,9 @@ function App() {
     <>
       <AuthProvider>
         {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
-        <AppRoutes />
+        <main className="pt-16">
+          <AppRoutes />
+        </main>
       </AuthProvider>
     </>
   );

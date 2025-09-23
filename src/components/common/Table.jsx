@@ -1,125 +1,113 @@
-import { Mail, User, Hash, Clock, UserCheck, Calendar, Search } from "lucide-react";
+import React from 'react';
 
-const Table = ({ filteredData, formatDecision, getDecisionColor , copiedText }) => {
+function Table({ 
+  headers = [], 
+  data = [], 
+  loading = false,
+  emptyMessage = "No data available",
+  emptySubMessage = "Check back later or adjust your filters",
+  className = "",
+  renderCell = null, 
+  onRowClick = null, 
+  hoverable = true,
+  striped = false,
+  compact = false
+}) {
+  
+  if (loading) {
+    return (
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+          <span className="ml-2 text-gray-600">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div className="text-center py-12">
+          <div className="mx-auto h-12 w-12 text-gray-400 mb-4">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <h3 className="text-sm font-medium text-gray-900">{emptyMessage}</h3>
+          <p className="mt-1 text-sm text-gray-500">{emptySubMessage}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white shadow-sm rounded-lg overflow-hidden">
+    <div className={`bg-white shadow-sm rounded-lg overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              {/* ID */}
-              <th className="px-4 py-3 text-left">
-                <div className="flex items-center space-x-1">
-                  <Hash className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </span>
-                </div>
-              </th>
-
-              {/* Date */}
-              <th className="px-4 py-3 text-left min-w-[120px]">
-                <div className="flex items-center space-x-1">
-                  <Calendar className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
-                  </span>
-                </div>
-              </th>
-
-              {/* Time */}
-              <th className="px-4 py-3 text-left min-w-[100px]">
-                <div className="flex items-center space-x-1">
-                  <Clock className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Time
-                  </span>
-                </div>
-              </th>
-
-              {/* Email */}
-              <th className="px-4 py-3 text-left min-w-[200px]">
-                <div className="flex items-center space-x-1">
-                  <Mail className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </span>
-                </div>
-              </th>
-
-              {/* Work Type */}
-              <th className="px-4 py-3 text-left min-w-[150px]">
-                <div className="flex items-center space-x-1">
-                  <User className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Work Type
-                  </span>
-                </div>
-              </th>
-
-              {/* GID */}
-              <th className="px-4 py-3 text-left">
-                <div className="flex items-center space-x-1">
-                  <Hash className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    GID
-                  </span>
-                </div>
-              </th>
-
-              {/* Decision */}
-              <th className="px-4 py-3 text-left min-w-[300px]">
-                <div className="flex items-center space-x-1">
-                  <UserCheck className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Decision
-                  </span>
-                </div>
-              </th>
+              {headers.map((header, index) => {
+                const IconComponent = header.icon;
+                return (
+                  <th 
+                    key={index} 
+                    className={`px-4 py-3 text-left ${header.className || ''} ${header.minWidth ? `min-w-[${header.minWidth}]` : ''}`}
+                  >
+                    <div className="flex items-center space-x-1">
+                      {IconComponent && (
+                        <IconComponent className="w-3 h-3 text-gray-400" />
+                      )}
+                      <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {header.label || header.name || header}
+                      </span>
+                      {header.sortable && (
+                        <button className="ml-1 text-gray-400 hover:text-gray-600">
+                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M5 8l5-5 5 5H5z"/>
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
 
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredData.map((row) => (
-              <tr key={row.id} className="hover:bg-gray-50">
-                <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {row.id}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-xs text-gray-500">
-                  {row.date}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-xs text-gray-500">
-                  {row.time}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">
-                  {row.email}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                      row.workType === "remote"
-                        ? "bg-blue-100 text-blue-800"
-                        : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {row.workType.charAt(0).toUpperCase() + row.workType.slice(1)}
-                  </span>
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900 font-mono">
-                  {row.gid}
-                  {copiedText === row.gid && (
-                    <span className="ml-2 text-green-600 text-xs">✔ Copied!</span>
-                  )}
-                </td>
-                <td className="px-4 py-2 whitespace-nowrap">
-                  <span
-                    className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getDecisionColor(
-                      row.decision
-                    )}`}
-                  >
-                    {formatDecision(row.decision)}
-                  </span>
-                </td>
+          <tbody className={`bg-white divide-y divide-gray-200 ${striped ? 'divide-y-0' : ''}`}>
+            {data.map((row, rowIndex) => (
+              <tr 
+                key={row.id || row._id || rowIndex} 
+                className={`
+                  ${hoverable ? 'hover:bg-gray-50' : ''} 
+                  ${striped && rowIndex % 2 === 1 ? 'bg-gray-50' : ''} 
+                  ${onRowClick ? 'cursor-pointer' : ''}
+                  transition-colors
+                `}
+                onClick={() => onRowClick && onRowClick(row, rowIndex)}
+              >
+                {headers.map((header, colIndex) => {
+                  const key = header.key || header.field || header;
+                  const value = typeof key === 'string' ? row[key] : '';
+                  
+                  return (
+                    <td 
+                      key={colIndex} 
+                      className={`
+                        px-4 ${compact ? 'py-2' : 'py-3'} 
+                        ${header.cellClassName || ''} 
+                        ${header.align === 'center' ? 'text-center' : header.align === 'right' ? 'text-right' : 'text-left'}
+                      `}
+                    >
+                      {renderCell ? renderCell(value, row, header, rowIndex, colIndex) : (
+                        <span className={`${header.textClassName || 'text-sm text-gray-900'}`}>
+                          {header.render ? header.render(value, row) : value || '-'}
+                        </span>
+                      )}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
@@ -127,6 +115,6 @@ const Table = ({ filteredData, formatDecision, getDecisionColor , copiedText }) 
       </div>
     </div>
   );
-};
+}
 
 export default Table;
