@@ -15,7 +15,7 @@ export const decisions = [
   'Combination of Duplicate, Not Duplicate & Not Sure'
 ];
 
-const sampleFeedbackData = [
+export const sampleFeedbackData = [
   {
     id: 'FB001',
     formDate: '2024-03-15',

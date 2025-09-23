@@ -105,6 +105,11 @@ const GidSearch = () => {
             <SearchBar
               searchQuery={searchQuery}
               onSearch={setSearchQuery}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setAppliedSearch(searchQuery);
+                }
+              }}
               placeholder="Enter GID..."
             />
             <button

@@ -229,19 +229,19 @@ function Dashboard() {
       icon: MoreHorizontal,
       minWidth: '120px',
       cellClassName: 'relative',
-      render: (value, row, header, rowIndex) => (
+      render: (value, row, header) => (
         <div className="relative">
           <button
             onClick={(e) => {
               e.stopPropagation();
-              handleToggleActionMenu(rowIndex);
+              handleToggleActionMenu(row.id);
             }}
             className="inline-flex items-center p-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
           >
             <MoreHorizontal className="w-4 h-4" />
           </button>
           
-          {openActionMenu === rowIndex && (
+          {openActionMenu === row.id && (
             <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-20">
               <div className="py-1">
                 <button

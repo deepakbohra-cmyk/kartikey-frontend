@@ -100,19 +100,19 @@ function FeedbackTable() {
       key: 'actions',
       label: 'Actions',
       icon: MoreHorizontal,
-      render: (value, row, header, rowIndex) => (
+      render: (value, row, header) => (
         <div className="relative">
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setOpenActionMenu(openActionMenu === rowIndex ? null : rowIndex);
+              setOpenActionMenu(openActionMenu === row.id ? null : row.id);
             }}
             className="inline-flex items-center p-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
           >
             <MoreHorizontal className="w-4 h-4" />
           </button>
 
-          {openActionMenu === rowIndex && (
+          {openActionMenu === row.id && (
             <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200 z-20">
               <button className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-50">
                 <Eye className="w-4 h-4 mr-2" /> View
