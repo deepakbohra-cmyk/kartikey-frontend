@@ -19,10 +19,10 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       const token = localStorage.getItem("authToken");
-      if (token) {
-        const userData = await authAPI.getUserData();
-        setUser(userData);
-        localStorage.setItem("user", JSON.stringify(userData));
+      const storedUser = localStorage.getItem("user");
+
+      if (token && storedUser) {
+        setUser(JSON.parse(storedUser));
       } else {
         setUser(null);
       }

@@ -8,32 +8,110 @@ import {
   UserCheck, 
   AlertCircle, 
   CheckCircle, 
-  XCircle, 
-  RefreshCw, 
-  MoreHorizontal, 
-  Eye, 
-  Edit, 
-  Trash2 
+  RefreshCw 
 } from 'lucide-react';
 import Table from '../common/Table';
-import { sampleFeedbackData } from '../constants/Sample';
+import { feedbackAPI } from '../../api/feedbackAPI';
 
+// ---- Modal Component ----
+function StatusUpdateModal({ isOpen, onClose, selectedRow, onStatusUpdate }) {
+  const [newStatus, setNewStatus] = useState(selectedRow?.status || '');
+
+  useEffect(() => {
+    setNewStatus(selectedRow?.status || '');
+  }, [selectedRow]);
+
+  if (!isOpen || !selectedRow) return null;
+
+  const handleSubmit = () => {
+    onStatusUpdate(selectedRow.id, newStatus);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+        <h2 className="text-xl font-semibold mb-4">Update Status</h2>
+
+        <p className="mb-2 text-gray-600">
+          <span className="font-medium">GID:</span> {selectedRow.gid}
+        </p>
+        <p className="mb-4 text-gray-600">
+          <span className="font-medium">Agent:</span> {selectedRow.agentEmail}
+        </p>
+
+        <select
+          value={newStatus}
+          onChange={(e) => setNewStatus(e.target.value)}
+          className="w-full border p-2 rounded mb-4"
+        >
+          <option value="OPEN">OPEN</option>
+          <option value="PENDING">PENDING</option>
+          <option value="CLOSED">CLOSED</option>
+        </select>
+
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- Main Component ----
 function FeedbackTable() {
   const [feedbackData, setFeedbackData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [openActionMenu, setOpenActionMenu] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
 
-  // Initialize data
   useEffect(() => {
-    setLoading(true);
-    setTimeout(() => {
-      setFeedbackData(sampleFeedbackData);
-      setFilteredData(sampleFeedbackData);
-      setLoading(false);
-    }, 500);
+    const fetchFeedback = async () => {
+      setLoading(true);
+      try {
+        const response = await feedbackAPI.getAllFeedback();
+        console.log("API raw response:", response);
+
+        const data = Array.isArray(response) ? response 
+                    : response?.data 
+                    ? response.data 
+                    : [];
+
+        const mapped = data.map(item => ({
+          id: String(item.id),
+          formDate: item.date,
+          formTime: item.time?.split('.')[0] || item.time,
+          agentEmail: item.email,
+          tlEmail: item.tlEmail,
+          gid: item.gid,
+          decision: item.decision,
+          status: item.status
+        }));
+
+        setFeedbackData(mapped);
+        setFilteredData(mapped);
+      } catch (error) {
+        console.error("Failed to fetch feedback:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeedback();
   }, []);
 
   // Filter data
@@ -56,6 +134,26 @@ function FeedbackTable() {
 
     setFilteredData(filtered);
   }, [feedbackData, searchTerm, statusFilter]);
+
+  const handleStatusUpdate = async (id, newStatus) => {
+  try {
+    const response = await feedbackAPI.changeStatus(id, { status: newStatus });
+
+    const updatedFeedback = response.data || response;
+
+    const updatedData = feedbackData.map(item =>
+      item.id === String(id) ? { ...item, status: updatedFeedback.status } : item
+    );
+
+    setFeedbackData(updatedData);
+    setFilteredData(updatedData);
+
+  } catch (error) {
+    console.error("Failed to update status:", error);
+    alert("Error updating status. Please try again.");
+  }
+};
+
 
   // Helpers
   const getStatusColor = (status) => {
@@ -96,39 +194,12 @@ function FeedbackTable() {
         </span>
       )
     },
-    {
-      key: 'actions',
-      label: 'Actions',
-      icon: MoreHorizontal,
-      render: (value, row, header, rowIndex) => (
-        <div className="relative">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpenActionMenu(openActionMenu === rowIndex ? null : rowIndex);
-            }}
-            className="inline-flex items-center p-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-
-          {openActionMenu === rowIndex && (
-            <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-md shadow-lg border border-gray-200 z-20">
-              <button className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-50">
-                <Eye className="w-4 h-4 mr-2" /> View
-              </button>
-              <button className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-50">
-                <Edit className="w-4 h-4 mr-2" /> Edit
-              </button>
-              <button className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                <Trash2 className="w-4 h-4 mr-2" /> Delete
-              </button>
-            </div>
-          )}
-        </div>
-      )
-    }
   ];
+
+  const handleRowClick = (row) => {
+    setSelectedRow(row);
+    setIsModalOpen(true);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -143,6 +214,14 @@ function FeedbackTable() {
           emptySubMessage="Try searching by ID, GID, Agent or TL email"
           hoverable
           compact={false}
+          onRowClick={handleRowClick}  
+        />
+
+        <StatusUpdateModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          selectedRow={selectedRow}
+          onStatusUpdate={handleStatusUpdate}
         />
       </div>
     </div>

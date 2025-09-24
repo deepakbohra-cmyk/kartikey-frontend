@@ -44,5 +44,7 @@ export const API_ENDPOINTS = {
   },
   FEEDBACK: {
     CREATE: "/feedback",
+    GETALL: "/feedback/getall",
+    STATUS: (id) => `/feedback/${id}/status`
   },
 };
