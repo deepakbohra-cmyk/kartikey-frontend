@@ -15,20 +15,10 @@ const SheetData = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
   const [showFilters, setShowFilters] = useState(false);
-  const [copied, setCopied] = useState();
+  const [copiedId, setCopiedId] = useState(null);
 
-  //copy gid to clipboard
-    useEffect(() => {
-    if (copied) {
-      navigator.clipboard.writeText(copied).then(() => {
-        console.log("Copied:", copied);
-        // Optionally show toast/alert
-        // alert(`Copied: ${selectedText}`);
-      });
-    }
-  }, [copied]);
 
   // Filters
   const [filters, setFilters] = useState({
@@ -89,13 +79,17 @@ const SheetData = () => {
       key: "gid",
       label: "GID",
       icon: Hash,
-      render: (value) => (
+      render: (value,row) => (
         <span
           className="text-sm font-mono text-gray-900 cursor-pointer hover:text-blue-600"
-          onClick={() => setCopied(value)}
+          onClick={() => {
+            navigator.clipboard.writeText(value).then(() => {
+            setCopiedId(row.id);
+        });
+      }}
         >
           {value}
-          {copied === value && (
+          {copiedId === row.id && (
             <span className="ml-2 text-xs text-green-600">✔ Copied</span>
             )}
         </span>
@@ -284,6 +278,7 @@ const SheetData = () => {
             emptySubMessage="Try adjusting your filters or check back later"
             hoverable={true}
             compact={false}
+            maxHeight="max-h-140"
           />
         </div>
 

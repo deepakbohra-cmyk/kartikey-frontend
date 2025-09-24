@@ -11,7 +11,8 @@ function Table({
   onRowClick = null, 
   hoverable = true,
   striped = false,
-  compact = false
+  compact = false,
+  maxHeight = "max-h-150"
 }) {
   
   if (loading) {
@@ -44,8 +45,9 @@ function Table({
   return (
     <div className={`bg-white shadow-sm rounded-lg overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
+        <div className={`${maxHeight} overflow-y-auto`}>
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 sticky top-0 z-10">
             <tr>
               {headers.map((header, index) => {
                 const IconComponent = header.icon;
@@ -112,6 +114,7 @@ function Table({
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

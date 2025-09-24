@@ -412,7 +412,7 @@ function Dashboard() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="sticky top-0 bg-gray-50 z-20 border-b border-gray-200 mb-8">
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
@@ -588,15 +588,20 @@ function Dashboard() {
         )}
 
         {/* Table using GlobalTable */}
-        <Table
-          headers={tableHeaders}
-          data={paginatedData}
-          loading={loading}
-          emptyMessage="No team members found"
-          emptySubMessage="Try adjusting your search criteria or filters"
-          hoverable={true}
-          compact={false}
-        />
+        <div className="mt-6 bg-white rounded-lg shadow overflow-hidden">
+          <div className="max-h-[500px] overflow-y-auto">
+          <Table
+            headers={tableHeaders}
+            data={paginatedData}
+            loading={loading}
+            emptyMessage="No team members found"
+            emptySubMessage="Try adjusting your search criteria or filters"
+            hoverable={true}
+            compact={false}
+            maxHeight="max-h-100" 
+          />
+          </div>
+        </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
