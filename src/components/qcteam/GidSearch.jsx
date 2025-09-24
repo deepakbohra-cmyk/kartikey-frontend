@@ -4,12 +4,15 @@ import Table from "../common/Table";
 import SearchBar from "../common/SearchBar";
 import Loading from "../common/Loding";
 import { qcTeamAPI } from "../../api/qcTeamAPI";
+import { useAuth } from "../../contexts/AuthContext";
+import { feedbackAPI } from "../../api/feedbackAPI";
 
 const GidSearch = () => {
   const [data, setData] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");       
-  const [appliedSearch, setAppliedSearch] = useState("");   
+  const [searchQuery, setSearchQuery] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const {user} = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -20,7 +23,7 @@ const GidSearch = () => {
 
       try {
         setLoading(true);
-        const res = await qcTeamAPI.searchByGid(appliedSearch); // ✅ await API
+        const res = await qcTeamAPI.searchByGid(appliedSearch);
         setData(res || []);
       } catch (error) {
         console.error("Error fetching GID:", error);
@@ -32,6 +35,33 @@ const GidSearch = () => {
 
     fetchData();
   }, [appliedSearch]);
+
+  const handleGiveFeedback = async (row) => {
+  try {
+    const qcEmail = user?.email;
+    if (!qcEmail) {
+      alert("User not logged in");
+      return;
+    }
+
+    const payload = {
+      formId: row.id,
+      agentEmail: row.email,
+      qcEmail: qcEmail,
+    };
+
+    console.log("Submitting feedback payload:", payload);
+
+    const res = await feedbackAPI.createFeedback(payload);
+    console.log("Feedback API response:", res);
+
+    alert("Feedback submitted successfully ✅");
+  } catch (error) {
+    console.error("Error submitting feedback:", error.response?.data || error.message);
+    alert("Failed to submit feedback ❌");
+  }
+};
+
 
   const getDecisionColor = (decision) => {
     const colors = {
@@ -82,8 +112,11 @@ const GidSearch = () => {
     {
       key: "action",
       label: "Action",
-      render: () => (
-        <button className="px-3 py-1 text-xs font-semibold text-white bg-purple-600 rounded-full hover:bg-purple-700">
+      render: (value, row) => (
+        <button
+          onClick={() => handleGiveFeedback(row)}
+          className="px-3 py-1 text-xs font-semibold text-white bg-purple-600 rounded-full hover:bg-purple-700"
+        >
           Give Feedback
         </button>
       ),
@@ -108,7 +141,7 @@ const GidSearch = () => {
               placeholder="Enter GID..."
             />
             <button
-              onClick={() => setAppliedSearch(searchQuery)} 
+              onClick={() => setAppliedSearch(searchQuery)}
               className="ml-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
             >
               Search
@@ -118,7 +151,7 @@ const GidSearch = () => {
 
         <Table
           headers={tableHeaders}
-          data={data} 
+          data={data}
           loading={loading}
           emptyMessage="No GID records found"
           emptySubMessage={

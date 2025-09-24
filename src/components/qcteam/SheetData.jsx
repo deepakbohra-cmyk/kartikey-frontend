@@ -18,7 +18,6 @@ const SheetData = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filters
   const [filters, setFilters] = useState({
     email: "",
     workType: "",
@@ -195,7 +194,7 @@ const SheetData = () => {
             </div>
 
             {/* Right: Buttons */}
-            <div className="mt-4 flex md:mt-0 md:ml-4 space-x-2">
+            <div className="mt-4 flex md:mt-0 md:ml-4 space-x-2 relative">
               <button
                 onClick={() => setShowFilters((prev) => !prev)}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
@@ -215,7 +214,7 @@ const SheetData = () => {
 
           {/* Filter dropdown */}
           {showFilters && (
-            <div className="mt-4 w-full max-w-3xl bg-white border border-gray-200 shadow-md rounded-lg p-4">
+            <div className="absolute right-0 mt-2 w-200 mr-8">
               <FilterControls
                 filters={filters}
                 onFilterChange={(name, value) =>

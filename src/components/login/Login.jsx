@@ -18,7 +18,7 @@ export default function LoginPage() {
       if (!userData) {
         throw new Error("Invalid credentials");
       }
-      navigate("/dashboard"); // ✅ redirect after login
+      navigate("/l1form"); 
     } catch (err) {
       setLocalError(err.message || "Unexpected error");
     }

@@ -12,7 +12,7 @@ function App() {
     <>
       <AuthProvider>
         {!hideNavbarRoutes.includes(location.pathname) && <Navbar />}
-        <main className="pt-16">
+        <main className={location.pathname === "/login" ? "" : "pt-16"}>
           <AppRoutes />
         </main>
       </AuthProvider>
