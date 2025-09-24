@@ -15,8 +15,9 @@ const SheetData = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(50);
   const [showFilters, setShowFilters] = useState(false);
+  const [copiedId, setCopiedId] = useState(null);
 
   const [filters, setFilters] = useState({
     email: "",
@@ -76,8 +77,20 @@ const SheetData = () => {
       key: "gid",
       label: "GID",
       icon: Hash,
-      render: (value) => (
-        <span className="text-sm font-mono text-gray-900">{value}</span>
+      render: (value,row) => (
+        <span
+          className="text-sm font-mono text-gray-900 cursor-pointer hover:text-blue-600"
+          onClick={() => {
+            navigator.clipboard.writeText(value).then(() => {
+            setCopiedId(row.id);
+        });
+      }}
+        >
+          {value}
+          {copiedId === row.id && (
+            <span className="ml-2 text-xs text-green-600">✔ Copied</span>
+            )}
+        </span>
       ),
     },
     {
@@ -263,6 +276,7 @@ const SheetData = () => {
             emptySubMessage="Try adjusting your filters or check back later"
             hoverable={true}
             compact={false}
+            maxHeight="max-h-140"
           />
         </div>
 

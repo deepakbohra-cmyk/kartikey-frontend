@@ -193,7 +193,7 @@ function Team() {
 
             {/* Center: Search Bar */}
             <div className="flex-1 flex justify-center">
-              <SearchBar searchQuery={searchQuery} onSearch={handleSearch} />
+              <SearchBar searchQuery={searchQuery} onSearch={handleSearch} placeholder="Search Name" />
             </div>
 
             {/* Right: Buttons */}

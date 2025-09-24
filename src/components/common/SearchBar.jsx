@@ -1,7 +1,7 @@
 import React from "react";
 import { Search } from "lucide-react";
 
-function SearchBar({ searchQuery, onSearch, placeholder="Enter GID" }) {
+function SearchBar({ searchQuery, onSearch, placeholder="Enter GID" , onKeyDown }) {
   return (
     <div className="w-full max-w-2xl"> 
       <div className="relative rounded-md shadow-md ">
@@ -11,6 +11,7 @@ function SearchBar({ searchQuery, onSearch, placeholder="Enter GID" }) {
         <input
           type="text"
           value={searchQuery}
+          onKeyDown={onKeyDown}
           onChange={(e) => onSearch(e.target.value)}
           className="focus:ring-purple-500 focus:border-purple-500 block w-full pl-10 pr-3 py-2 sm:text-sm border-gray-300 rounded-md"
           placeholder={placeholder || "Search..."}

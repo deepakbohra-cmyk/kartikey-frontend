@@ -9,7 +9,7 @@ const Pagination = ({
   itemsPerPage, 
   startIndex, 
   endIndex,
-  pageSizeOptions = [10, 20, 50, 100],
+  pageSizeOptions = [50, 100, 150, 200],
   onPageSizeChange
 }) => {
   const getPageNumbers = () => {
