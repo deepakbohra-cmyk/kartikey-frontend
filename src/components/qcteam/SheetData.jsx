@@ -270,10 +270,6 @@ const SheetData = () => {
               </p>
             </div>
 
-            <div className="flex-1 flex justify-center">
-              <SearchBar searchQuery={searchQuery} onSearch={setSearchQuery} />
-            </div>
-
             <div className="mt-4 flex md:mt-0 md:ml-4 space-x-2 relative">
               <button
                 onClick={() => setShowFilters((prev) => !prev)}
@@ -294,7 +290,7 @@ const SheetData = () => {
           </div>
 
           {showFilters && (
-            <div className="absolute right-0 mt-2 w-200 mr-8 z-10">
+            <div className="absolute right-0 mt-2 w-200 mr-8 z-15">
               <FilterControls
                 filters={filters}
                 onFilterChange={handleFilterChange}
