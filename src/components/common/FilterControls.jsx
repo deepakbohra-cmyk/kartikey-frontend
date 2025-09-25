@@ -76,21 +76,6 @@ const FilterControls = ({
           </select>
         </div>
 
-        {/* GID Filter */}
-        <div className="space-y-1">
-          <label className="flex items-center text-sm font-medium text-gray-700">
-            <Hash className="w-4 h-4 mr-1" />
-            GID
-          </label>
-          <input
-            type="text"
-            value={filters.gid}
-            onChange={(e) => onFilterChange('gid', e.target.value)}
-            placeholder="Enter GID..."
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-          />
-        </div>
-
         {/* Decision Filter */}
         <div className="space-y-1">
           <label className="flex items-center text-sm font-medium text-gray-700">
