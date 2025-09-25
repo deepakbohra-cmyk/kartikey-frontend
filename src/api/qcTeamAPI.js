@@ -7,7 +7,6 @@ export const qcTeamAPI = {
       const response = await apiClient.get(API_ENDPOINTS.QCTEAM.GETFORMS, { 
         params: {
           ...params,
-          // Convert dates to proper format if they exist
           ...(params.fromDate && { fromDate: params.fromDate }),
           ...(params.toDate && { toDate: params.toDate }),
         }

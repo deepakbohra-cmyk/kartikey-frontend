@@ -1,6 +1,8 @@
 // SheetData.jsx
-import React, { useState, useEffect, useMemo } from "react";
-import { Mail, User, Hash, Clock, UserCheck, Calendar, Download, Filter } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import {
+  Mail, User, Hash, Clock, UserCheck, Calendar, Download, Filter,
+} from "lucide-react";
 import Table from "../common/Table";
 import Pagination from "../common/Pagination";
 import { qcTeamAPI } from "../../api/qcTeamAPI";
@@ -10,12 +12,12 @@ import Loading from "../common/Loding";
 
 const SheetData = () => {
   const [data, setData] = useState([]);
-  const [allData, setAllData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(50);
+  const [totalItems, setTotalItems] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
 
@@ -30,7 +32,16 @@ const SheetData = () => {
 
   const [appliedFilters, setAppliedFilters] = useState({ ...filters });
 
-  // Table Headers
+  const getDecisionColor = (decision) => {
+    const colors = {
+      Duplicate: "bg-red-100 text-red-800",
+      "Not Duplicate": "bg-green-100 text-green-800",
+      "Not Sure - Bad Data": "bg-yellow-100 text-yellow-800",
+      "On Hold": "bg-gray-100 text-gray-800",
+    };
+    return colors[decision] || "bg-gray-100 text-gray-800";
+  };
+
   const tableHeaders = [
     { key: "id", label: "ID", icon: Hash },
     {
@@ -77,19 +88,19 @@ const SheetData = () => {
       key: "gid",
       label: "GID",
       icon: Hash,
-      render: (value,row) => (
+      render: (value, row) => (
         <span
           className="text-sm font-mono text-gray-900 cursor-pointer hover:text-blue-600"
           onClick={() => {
             navigator.clipboard.writeText(value).then(() => {
-            setCopiedId(row.id);
-        });
-      }}
+              setCopiedId(row.id);
+            });
+          }}
         >
           {value}
           {copiedId === row.id && (
             <span className="ml-2 text-xs text-green-600">✔ Copied</span>
-            )}
+          )}
         </span>
       ),
     },
@@ -109,27 +120,67 @@ const SheetData = () => {
     },
   ];
 
-  const getDecisionColor = (decision) => {
-    const colors = {
-      Duplicate: "bg-red-100 text-red-800",
-      "Not Duplicate": "bg-green-100 text-green-800",
-      "Not Sure - Bad Data": "bg-yellow-100 text-yellow-800",
-      "On Hold": "bg-gray-100 text-gray-800",
-    };
-    return colors[decision] || "bg-gray-100 text-gray-800";
-  };
-
-  // Fetch data
   const fetchData = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
+      const params = {
+        page: currentPage - 1, 
+        size: rowsPerPage,
+        search: searchQuery,
+        ...appliedFilters,
+      };
+
+      Object.keys(params).forEach((key) => {
+        if (!params[key] && params[key] !== 0) delete params[key];
+      });
+
+      console.log('API params:', params); 
+
+      const response = await qcTeamAPI.getForms(params);
+      console.log('API response:', response); 
+
+      if (response && typeof response === 'object') {
+        if (Array.isArray(response)) {
+          setData(response);
+          
+          if (response.length === rowsPerPage) {
+            setTotalItems((currentPage * rowsPerPage) + 1); 
+            setTotalItems((currentPage - 1) * rowsPerPage + response.length);
+          }
+        } else if (response.content && Array.isArray(response.content)) {
+          setData(response.content);
+          setTotalItems(response.totalElements || response.totalCount || response.total || 0);
+        } else if (response.data && Array.isArray(response.data)) {
+          setData(response.data);
+          setTotalItems(response.totalElements || response.totalCount || response.total || 0);
+        } else if (response.items && Array.isArray(response.items)) {
+          setData(response.items);
+          setTotalItems(response.totalElements || response.totalCount || response.total || 0);
+        } else {
+          const dataArray = response.content || response.data || response.items || [];
+          setData(dataArray);
+          
+          const totalCount = response.totalElements || 
+                           response.totalCount || 
+                           response.total || 
+                           response.count || 
+                           response.totalItems ||
+                           response.totalRecords ||
+                           0;
+          
+          setTotalItems(totalCount);
+        }
+      } else {
+        setData([]);
+        setTotalItems(0);
+      }
+
       setError("");
-      const response = await qcTeamAPI.getForms(appliedFilters);
-      setData(response || []);
-      setAllData(response || []);
     } catch (err) {
+      console.error('API Error:', err);
       setError("Failed to load data. Please try again.");
       setData([]);
+      setTotalItems(0);
     } finally {
       setLoading(false);
     }
@@ -137,36 +188,46 @@ const SheetData = () => {
 
   useEffect(() => {
     fetchData();
-  }, [appliedFilters]);
+  }, [currentPage, rowsPerPage, appliedFilters, searchQuery]);
 
-  // Search
-  useEffect(() => {
-    if (searchQuery.trim() === "") {
-      setData(allData);
-      setCurrentPage(1);
-    } else {
-      const delayDebounce = setTimeout(() => {
-        const filtered = allData.filter((item) =>
-          item.email?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-        setData(filtered);
-        setCurrentPage(1);
-      }, 400);
-      return () => clearTimeout(delayDebounce);
-    }
-  }, [searchQuery]);
+  const handleFilterChange = (filterName, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterName]: value,
+    }));
+  };
 
-  // Pagination
-  const startIndex = (currentPage - 1) * rowsPerPage + 1;
-  const endIndex = Math.min(currentPage * rowsPerPage, data.length);
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * rowsPerPage;
-    return data.slice(start, start + rowsPerPage);
-  }, [data, currentPage, rowsPerPage]);
+  const handleApplyFilters = () => {
+    setAppliedFilters({ ...filters });
+    setCurrentPage(1); // Reset to first page when applying filters
+    setShowFilters(false);
+  };
 
-  const totalPages = Math.ceil(data.length / rowsPerPage);
+  const handleClearFilters = () => {
+    const cleared = {
+      email: "",
+      workType: "",
+      gid: "",
+      decision: "",
+      fromDate: "",
+      toDate: "",
+    };
+    setFilters(cleared);
+    setAppliedFilters(cleared);
+    setCurrentPage(1);
+  };
 
-  // Export CSV
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // Scroll to top when changing pages
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePageSizeChange = (size) => {
+    setRowsPerPage(size);
+    setCurrentPage(1); // Reset to first page when changing page size
+  };
+
   const handleExport = () => {
     const csvContent = [
       ["ID", "Date", "Time", "Email", "WorkType", "GID", "Decision"].join(","),
@@ -187,26 +248,32 @@ const SheetData = () => {
 
   if (loading && data.length === 0) return <Loading />;
 
+  // Calculate pagination values
+  const startIndex = totalItems === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+  const endIndex = Math.min(currentPage * rowsPerPage, totalItems);
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+
+  console.log('Pagination values:', { totalItems, totalPages, currentPage, rowsPerPage }); // Debug log
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-9xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="md:flex md:items-center md:justify-between">
-            {/* Left: Title */}
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold text-gray-900">Data Overview</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Data Overview
+              </h1>
               <p className="mt-1 text-sm text-gray-500">
-                Showing {paginatedData.length} of {data.length} records
+                {totalItems > 0 ? `Showing ${startIndex}–${endIndex} of ${totalItems} records` : 'No records found'}
               </p>
             </div>
 
-            {/* Center: Search Bar */}
             <div className="flex-1 flex justify-center">
               <SearchBar searchQuery={searchQuery} onSearch={setSearchQuery} />
             </div>
 
-            {/* Right: Buttons */}
             <div className="mt-4 flex md:mt-0 md:ml-4 space-x-2 relative">
               <button
                 onClick={() => setShowFilters((prev) => !prev)}
@@ -217,7 +284,8 @@ const SheetData = () => {
               </button>
               <button
                 onClick={handleExport}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+                disabled={data.length === 0}
+                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 <Download className="w-4 h-4 mr-2" />
                 Export
@@ -225,37 +293,14 @@ const SheetData = () => {
             </div>
           </div>
 
-          {/* Filter dropdown */}
           {showFilters && (
-            <div className="absolute right-0 mt-2 w-200 mr-8">
+            <div className="absolute right-0 mt-2 w-200 mr-8 z-10">
               <FilterControls
                 filters={filters}
-                onFilterChange={(name, value) =>
-                  setFilters((prev) => ({ ...prev, [name]: value }))
-                }
-                onApplyFilters={() => {
-                  setAppliedFilters({ ...filters });
-                  setShowFilters(false);
-                }}
-                onClearFilters={() => {
-                  setFilters({
-                    email: "",
-                    workType: "",
-                    gid: "",
-                    decision: "",
-                    fromDate: "",
-                    toDate: "",
-                  });
-                  setAppliedFilters({
-                    email: "",
-                    workType: "",
-                    gid: "",
-                    decision: "",
-                    fromDate: "",
-                    toDate: "",
-                  });
-                  setShowFilters(false);
-                }}
+                onFilterChange={handleFilterChange}
+                onApplyFilters={handleApplyFilters}
+                onClearFilters={handleClearFilters}
+                isLoading={loading}
               />
             </div>
           )}
@@ -270,30 +315,30 @@ const SheetData = () => {
         <div className="mb-6">
           <Table
             headers={tableHeaders}
-            data={paginatedData}
+            data={data}
             loading={loading}
             emptyMessage="No data available"
             emptySubMessage="Try adjusting your filters or check back later"
-            hoverable={true}
+            hoverable
             compact={false}
             maxHeight="max-h-140"
           />
         </div>
 
-        {totalPages > 1 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-            totalItems={data.length}
-            itemsPerPage={rowsPerPage}
-            startIndex={startIndex}
-            endIndex={endIndex}
-            onPageSizeChange={(size) => {
-              setRowsPerPage(size);
-              setCurrentPage(1);
-            }}
-          />
+        {/* Show pagination when there are items (even if totalPages calculation is wrong) */}
+        {data.length > 0 && (data.length === rowsPerPage || totalPages > 1) && (
+          <div className="mt-6">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.max(totalPages, currentPage + (data.length === rowsPerPage ? 1 : 0))}
+              onPageChange={handlePageChange}
+              totalItems={totalItems}
+              itemsPerPage={rowsPerPage}
+              startIndex={startIndex}
+              endIndex={endIndex}
+              onPageSizeChange={handlePageSizeChange}
+            />
+          </div>
         )}
       </div>
     </div>
