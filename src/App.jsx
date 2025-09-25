@@ -6,7 +6,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 function App() {
   const location = useLocation();
   // const hideNavbarRoutes = ['/l1form','/feedbackform', '/login']
-  const hideNavbarRoutes = ["/login"];
+  const hideNavbarRoutes = ["/login" , "/oauth2/redirect"];
 
   return (
     <>

@@ -13,7 +13,6 @@ import {
 import Table from '../common/Table';
 import { feedbackAPI } from '../../api/feedbackAPI';
 
-// ---- Modal Component ----
 function StatusUpdateModal({ isOpen, onClose, selectedRow, onStatusUpdate }) {
   const [newStatus, setNewStatus] = useState(selectedRow?.status || '');
 
@@ -46,7 +45,8 @@ function StatusUpdateModal({ isOpen, onClose, selectedRow, onStatusUpdate }) {
           className="w-full border p-2 rounded mb-4"
         >
           <option value="OPEN">OPEN</option>
-          <option value="PENDING">PENDING</option>
+          <option value="AGENTACTIONREQUIRED">AGENT ACTION REQUIRED</option>
+          <option value="QAREVIEWPENDING">QA REVIEW PENDING</option>
           <option value="CLOSED">CLOSED</option>
         </select>
 
@@ -159,7 +159,8 @@ function FeedbackTable() {
   const getStatusColor = (status) => {
     const colors = {
       'OPEN': 'bg-blue-100 text-blue-800',
-      'PENDING': 'bg-yellow-100 text-yellow-800',
+      'AGENTACTIONREQUIRED': 'bg-yellow-100 text-yellow-800',
+      'QAREVIEWPENDING': 'bg-red-100 text-red-800',
       'CLOSED': 'bg-green-100 text-green-800'
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
@@ -168,13 +169,13 @@ function FeedbackTable() {
   const getStatusIcon = (status) => {
     const icons = {
       'OPEN': <RefreshCw className="w-3 h-3 mr-1" />,
-      'PENDING': <AlertCircle className="w-3 h-3 mr-1" />,
+      'AGENTACTIONREQUIRED': <RefreshCw className="w-3 h-3 mr-1" />,
+      'QAREVIEWPENDING': <AlertCircle className="w-3 h-3 mr-1" />,
       'CLOSED': <CheckCircle className="w-3 h-3 mr-1" />
     };
     return icons[status] || null;
   };
 
-  // Table headers
   const tableHeaders = [
     { key: 'id', label: 'ID', icon: Hash },
     { key: 'formDate', label: 'Date', icon: Calendar },

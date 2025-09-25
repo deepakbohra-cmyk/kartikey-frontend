@@ -12,16 +12,26 @@ import FeedbackTable from "../components/l1team/FeedbackTable";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 
 function AppRoutes() {
-  const role = ["L1TEAM" , "QCTEAM" , "ADMIN"]
+  const adminRole = ["ADMIN"];
+  const qcRole = ["QCTEAM", "ADMIN"];
+  const l1Role = ["L1TEAM", "QCTEAM", "ADMIN"];
+
   return (
     <>
       <Routes>
-        <Route path="/" element={<Login />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute allowedRoles={adminRole}>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/login" element={<Login />} />
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={role}>
+            <ProtectedRoute allowedRoles={adminRole}>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -29,7 +39,7 @@ function AppRoutes() {
         <Route
           path="/gid"
           element={
-            <ProtectedRoute allowedRoles={role}>
+            <ProtectedRoute allowedRoles={qcRole}>
               <GidSearch />
             </ProtectedRoute>
           }
@@ -37,7 +47,7 @@ function AppRoutes() {
         <Route
           path="/l1form"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={l1Role}>
               <L1Form />
             </ProtectedRoute>
           }
@@ -45,7 +55,7 @@ function AppRoutes() {
         <Route
           path="/sheetdata"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={qcRole}>
               <SheetData />
             </ProtectedRoute>
           }
@@ -53,7 +63,7 @@ function AppRoutes() {
         <Route
           path="/feedbackform"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={l1Role}>
               <FeedbackForm />
             </ProtectedRoute>
           }
@@ -61,7 +71,7 @@ function AppRoutes() {
         <Route
           path="/feedback"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={l1Role}>
               <FeedbackTable />
             </ProtectedRoute>
           }
@@ -69,7 +79,7 @@ function AppRoutes() {
         <Route
           path="/team"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute allowedRoles={qcRole}>
               <Team />
             </ProtectedRoute>
           }

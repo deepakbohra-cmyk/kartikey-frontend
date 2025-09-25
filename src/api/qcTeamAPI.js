@@ -11,7 +11,7 @@ export const qcTeamAPI = {
           ...(params.toDate && { toDate: params.toDate }),
         }
       });
-      return response.data;
+      return response.data; 
     } catch (error) {
       console.error('Error fetching forms:', error);
       throw error;

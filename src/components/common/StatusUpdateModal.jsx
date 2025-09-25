@@ -1,26 +1,10 @@
-import React from 'react'
+import React, { useState, useEffect } from "react";
 
-import React, { useState, useEffect } from 'react';
-import { 
-  Hash, 
-  Calendar, 
-  Clock, 
-  User, 
-  Mail, 
-  UserCheck, 
-  AlertCircle, 
-  CheckCircle, 
-  RefreshCw 
-} from 'lucide-react';
-import Table from '../common/Table';
-import { feedbackAPI } from '../../api/feedbackAPI';
-
-// ---- Modal Component ----
 function StatusUpdateModal({ isOpen, onClose, selectedRow, onStatusUpdate }) {
-  const [newStatus, setNewStatus] = useState(selectedRow?.status || '');
+  const [newStatus, setNewStatus] = useState(selectedRow?.status || "");
 
   useEffect(() => {
-    setNewStatus(selectedRow?.status || '');
+    setNewStatus(selectedRow?.status || "");
   }, [selectedRow]);
 
   if (!isOpen || !selectedRow) return null;
@@ -45,10 +29,10 @@ function StatusUpdateModal({ isOpen, onClose, selectedRow, onStatusUpdate }) {
         <select
           value={newStatus}
           onChange={(e) => setNewStatus(e.target.value)}
-          className="w-full border p-2 rounded mb-4"
         >
           <option value="OPEN">OPEN</option>
-          <option value="PENDING">PENDING</option>
+          <option value="AGENTACTIONREQUIRED">AGENT ACTION REQUIRED</option>
+          <option value="QAREVIEWPENDING">QA REVIEW PENDING</option>
           <option value="CLOSED">CLOSED</option>
         </select>
 
@@ -69,8 +53,6 @@ function StatusUpdateModal({ isOpen, onClose, selectedRow, onStatusUpdate }) {
       </div>
     </div>
   );
-}   
+}
 
-
-
-export default StatusUpdateModal
+export default StatusUpdateModal;

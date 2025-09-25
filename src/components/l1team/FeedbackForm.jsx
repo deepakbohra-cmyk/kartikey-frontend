@@ -12,7 +12,6 @@ export default function FeedbackStatusUpdater() {
     gid: null
   });
 
-  // Status options
   const statusOptions = [
     { value: 'Closed', label: 'Closed', color: 'bg-gray-500' },
     { value: 'Pending QA Review', label: 'Pending QA Review', color: 'bg-yellow-500' },
@@ -35,12 +34,6 @@ export default function FeedbackStatusUpdater() {
       console.error('Invalid row number:', mockData.rowNumber);
     }
   }, []);
-
-  // Simulate the Google Apps Script updateFeedbackStatus function
-
-  // This function as of now is just a mock to simulate success and failure scenarios.
-  // In a real-world scenario, this would call backend and update the status in the database.
-  //Following that the response would be handled accordingly and displayed in the screen.
   const updateFeedbackStatus = async (rowNumber, status) => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {

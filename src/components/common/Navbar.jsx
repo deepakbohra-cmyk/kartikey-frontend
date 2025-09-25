@@ -9,13 +9,17 @@ export default function Navbar() {
   const menuRef = useRef(null);
 
   const navItems = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "Team", path: "/team" },
-    { name: "Sheets", path: "/sheetdata" },
-    { name: "Gid Search", path: "/gid" },
-    { name: "Form", path: "/l1form" },
-    { name: "Feedback", path: "/feedback" },
+    { name: "Dashboard", path: "/dashboard", roles: ["ADMIN"] },
+    { name: "Team", path: "/team", roles: ["QCTEAM", "ADMIN"] },
+    { name: "Sheets", path: "/sheetdata", roles: ["QCTEAM", "ADMIN"] },
+    { name: "Gid Search", path: "/gid", roles: ["QCTEAM", "ADMIN"] },
+    { name: "Form", path: "/l1form", roles: ["L1TEAM", "QCTEAM", "ADMIN"] },
+    { name: "Feedback", path: "/feedback", roles: ["L1TEAM", "QCTEAM", "ADMIN"] },
   ];
+
+  const filteredNavItems = user
+    ? navItems.filter(item => item.roles.includes(user.role))
+    : [];
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-gray-800 z-50 shadow-md">
@@ -28,7 +32,7 @@ export default function Navbar() {
 
           <div className="hidden sm:block">
             <div className="flex space-x-4">
-              {navItems.map((link) => (
+              {filteredNavItems.map((link) => (
                 <NavLink
                   key={link.path}
                   to={link.path}
