@@ -8,6 +8,8 @@ export default function Navbar() {
   const { user, logout } = useAuth(); 
   const menuRef = useRef(null);
 
+  const username = user?.email ? user.email.split("@")[0].split(".")[0] : "Guest";
+  const name = username.charAt(0).toUpperCase() + username.slice(1);
   const navItems = [
     { name: "Dashboard", path: "/dashboard", roles: ["ADMIN"] },
     { name: "Team", path: "/team", roles: ["QCTEAM", "ADMIN"] },
@@ -53,10 +55,10 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {user && (
               <div className="flex items-center space-x-3" ref={menuRef}>
+                <p className="sm:inline text-white font-medium">
+                  {name}
+                </p>
                 <CgProfile size={24} className="text-gray-300" />
-                <span className="hidden sm:inline text-white font-medium">
-                  {user.name}
-                </span>
                 <NavLink
                   to="/login"
                   onClick={logout}
