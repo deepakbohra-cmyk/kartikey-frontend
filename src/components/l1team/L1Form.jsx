@@ -82,7 +82,7 @@ const L1Form = () => {
           workType: "",
           gid: "",
           decision: "",
-          email: email, // ✅ keep email
+          email: email,
         });
       }, 2000);
     } catch (error) {

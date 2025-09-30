@@ -4,7 +4,6 @@ import Login from "../components/login/Login";
 import Dashboard from "../components/qcteam/Dashboard";
 import L1Form from "../components/l1team/L1Form";
 import SheetData from "../components/qcteam/SheetData";
-import FeedbackForm from "../components/l1team/FeedbackForm";
 import GidSearch from "../components/qcteam/GidSearch";
 import Team from "../components/qcteam/Team";
 import OAuth2Redirect from "../components/login/OAuth2Redirect";
@@ -57,14 +56,6 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={qcRole}>
               <SheetData />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/feedbackform"
-          element={
-            <ProtectedRoute allowedRoles={l1Role}>
-              <FeedbackForm />
             </ProtectedRoute>
           }
         />

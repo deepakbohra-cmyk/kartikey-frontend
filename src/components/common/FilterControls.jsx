@@ -11,8 +11,8 @@ const FilterControls = ({
 }) => {
   const workTypeOptions = [
     { value: '', label: 'All Work Types' },
-    { value: 'remote', label: 'Remote' },
-    { value: 'office', label: 'Office' }
+    { value: 'REWORK', label: 'REWORK' },
+    { value: 'NORMAL', label: 'NORMAL' }
   ];
 
   const decisionOptions = [

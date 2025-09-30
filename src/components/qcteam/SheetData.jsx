@@ -1,7 +1,14 @@
 // SheetData.jsx
 import React, { useState, useEffect } from "react";
 import {
-  Mail, User, Hash, Clock, UserCheck, Calendar, Download, Filter,
+  Mail,
+  User,
+  Hash,
+  Clock,
+  UserCheck,
+  Calendar,
+  Download,
+  Filter,
 } from "lucide-react";
 import Table from "../common/Table";
 import Pagination from "../common/Pagination";
@@ -54,7 +61,12 @@ const SheetData = () => {
       key: "time",
       label: "Time",
       icon: Clock,
-      render: (value) => <span className="text-sm text-gray-700">{value}</span>,
+      render: (value) => {
+        const [hours, minutes] = value.split(":");
+        return (
+          <span className="text-sm text-gray-700">{`${hours}:${minutes}`}</span>
+        );
+      },
     },
     {
       key: "email",
@@ -124,7 +136,7 @@ const SheetData = () => {
     setLoading(true);
     try {
       const params = {
-        page: currentPage - 1, 
+        page: currentPage - 1,
         size: rowsPerPage,
         search: searchQuery,
         ...appliedFilters,
@@ -134,40 +146,48 @@ const SheetData = () => {
         if (!params[key] && params[key] !== 0) delete params[key];
       });
 
-      console.log('API params:', params); 
+      console.log("API params:", params);
 
       const response = await qcTeamAPI.getForms(params);
-      console.log('API response:', response); 
+      console.log("API response:", response);
 
-      if (response && typeof response === 'object') {
+      if (response && typeof response === "object") {
         if (Array.isArray(response)) {
           setData(response);
-          
+
           if (response.length === rowsPerPage) {
-            setTotalItems((currentPage * rowsPerPage) + 1); 
+            setTotalItems(currentPage * rowsPerPage + 1);
             setTotalItems((currentPage - 1) * rowsPerPage + response.length);
           }
         } else if (response.content && Array.isArray(response.content)) {
           setData(response.content);
-          setTotalItems(response.totalElements || response.totalCount || response.total || 0);
+          setTotalItems(
+            response.totalElements || response.totalCount || response.total || 0
+          );
         } else if (response.data && Array.isArray(response.data)) {
           setData(response.data);
-          setTotalItems(response.totalElements || response.totalCount || response.total || 0);
+          setTotalItems(
+            response.totalElements || response.totalCount || response.total || 0
+          );
         } else if (response.items && Array.isArray(response.items)) {
           setData(response.items);
-          setTotalItems(response.totalElements || response.totalCount || response.total || 0);
+          setTotalItems(
+            response.totalElements || response.totalCount || response.total || 0
+          );
         } else {
-          const dataArray = response.content || response.data || response.items || [];
+          const dataArray =
+            response.content || response.data || response.items || [];
           setData(dataArray);
-          
-          const totalCount = response.totalElements || 
-                           response.totalCount || 
-                           response.total || 
-                           response.count || 
-                           response.totalItems ||
-                           response.totalRecords ||
-                           0;
-          
+
+          const totalCount =
+            response.totalElements ||
+            response.totalCount ||
+            response.total ||
+            response.count ||
+            response.totalItems ||
+            response.totalRecords ||
+            0;
+
           setTotalItems(totalCount);
         }
       } else {
@@ -177,7 +197,7 @@ const SheetData = () => {
 
       setError("");
     } catch (err) {
-      console.error('API Error:', err);
+      console.error("API Error:", err);
       setError("Failed to load data. Please try again.");
       setData([]);
       setTotalItems(0);
@@ -219,13 +239,12 @@ const SheetData = () => {
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    // Scroll to top when changing pages
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handlePageSizeChange = (size) => {
     setRowsPerPage(size);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setCurrentPage(1);
   };
 
   const handleExport = () => {
@@ -253,20 +272,27 @@ const SheetData = () => {
   const endIndex = Math.min(currentPage * rowsPerPage, totalItems);
   const totalPages = Math.ceil(totalItems / rowsPerPage);
 
-  console.log('Pagination values:', { totalItems, totalPages, currentPage, rowsPerPage }); // Debug log
+  console.log("Pagination values:", {
+    totalItems,
+    totalPages,
+    currentPage,
+    rowsPerPage,
+  }); // Debug log
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-9xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-9xl mx-auto py-2 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-2">
           <div className="md:flex md:items-center md:justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
                 Data Overview
               </h1>
               <p className="mt-1 text-sm text-gray-500">
-                {totalItems > 0 ? `Showing ${startIndex}–${endIndex} of ${totalItems} records` : 'No records found'}
+                {totalItems > 0
+                  ? `Showing ${startIndex}–${endIndex} of ${totalItems} records`
+                  : "No records found"}
               </p>
             </div>
 
@@ -303,12 +329,12 @@ const SheetData = () => {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
+          <div className="mb-2 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
             {error}
           </div>
         )}
 
-        <div className="mb-6">
+        <div className="mb-2">
           <Table
             headers={tableHeaders}
             data={data}
@@ -317,16 +343,17 @@ const SheetData = () => {
             emptySubMessage="Try adjusting your filters or check back later"
             hoverable
             compact={false}
-            maxHeight="max-h-140"
           />
         </div>
 
-        {/* Show pagination when there are items (even if totalPages calculation is wrong) */}
         {data.length > 0 && (data.length === rowsPerPage || totalPages > 1) && (
-          <div className="mt-6">
+          <div className="mt-2">
             <Pagination
               currentPage={currentPage}
-              totalPages={Math.max(totalPages, currentPage + (data.length === rowsPerPage ? 1 : 0))}
+              totalPages={Math.max(
+                totalPages,
+                currentPage + (data.length === rowsPerPage ? 1 : 0)
+              )}
               onPageChange={handlePageChange}
               totalItems={totalItems}
               itemsPerPage={rowsPerPage}

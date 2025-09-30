@@ -13,11 +13,11 @@ const OAuth2Redirect = () => {
     if (token) {
       localStorage.setItem("authToken", token);
       localStorage.setItem("user", JSON.stringify({ email, role }));
-      navigate("/dashboard", { replace: true });
+      navigate("/l1form", { replace: true });
     } else {
       const savedToken = localStorage.getItem("authToken");
       if (savedToken) {
-        navigate("/dashboard", { replace: true });
+        navigate("/l1form", { replace: true });
       } else {
         navigate("/login?error=OAuth2Failed", { replace: true });
       }
