@@ -9,6 +9,7 @@ import Team from "../components/qcteam/Team";
 import OAuth2Redirect from "../components/login/OAuth2Redirect";
 import FeedbackTable from "../components/l1team/FeedbackTable";
 import ProtectedRoute from "../components/common/ProtectedRoute";
+import QcSheetData from "../components/qcteam/QcSheetData";
 
 function AppRoutes() {
   const adminRole = ["ADMIN"];
@@ -48,6 +49,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={l1Role}>
               <L1Form />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/qcsheetdata"
+          element={
+            <ProtectedRoute allowedRoles={qcRole}>
+              <QcSheetData />
             </ProtectedRoute>
           }
         />

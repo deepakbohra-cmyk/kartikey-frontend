@@ -176,6 +176,18 @@ function Dashboard() {
       )
     },
     {
+      key: 'formOpened',
+      label: 'Form Opened',
+      icon: BarChart3,
+      align: 'center',
+      render: (value, row) => (
+        <div className="flex items-center justify-center">
+          <div className="text-sm font-semibold text-green-600">{value}</div>
+          <TrendingUp className="ml-1 h-3 w-3 text-green-400" />
+        </div>
+      )
+    },
+    {
       key: 'error',
       label: 'Errors',
       icon: AlertCircle,
@@ -337,6 +349,19 @@ function Dashboard() {
                 Monitor team productivity and performance metrics
               </p>
             </div>
+            {/* Search Bar */}
+          <div className="relative max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-4 w-4 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search by name, team, or email..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+            />
+          </div>
             <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -354,90 +379,10 @@ function Dashboard() {
               </button>
             </div>
           </div>
-
-          {/* Stats Cards */}
-          <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <Users className="h-6 w-6 text-blue-400" />
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Total Users</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.totalUsers}</dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <CheckCircle className="h-6 w-6 text-green-400" />
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Active Users</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.activeUsers}</dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <BarChart3 className="h-6 w-6 text-purple-400" />
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Total Forms</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.totalFilled}</dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <AlertCircle className="h-6 w-6 text-red-400" />
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">Error Rate</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.errorRate}%</dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Search and Filters */}
         <div className="mb-6 space-y-4">
-          {/* Search Bar */}
-          <div className="relative max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
-            </div>
-            <input
-              type="text"
-              placeholder="Search by name, team, or email..."
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
-            />
-          </div>
 
           {/* Filters Panel */}
           {showFilters && (
