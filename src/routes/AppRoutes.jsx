@@ -92,6 +92,7 @@ function AppRoutes() {
               <L1Form />
             </ProtectedRoute>
           }
+        />
         <Route 
           path="/team/add" 
           element={
