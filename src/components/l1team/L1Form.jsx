@@ -2,19 +2,22 @@ import React, { useState, useEffect } from "react";
 import { CheckCircle } from "lucide-react";
 import { l1TeamAPI } from "../../api/l1TeamAPI";
 import { useAuth } from "../../contexts/AuthContext";
+import { useParams, useLocation } from "react-router-dom";
 
 const L1Form = () => {
-  const { user } = useAuth();
-  const [isChecked, setIsChecked] = useState(false);
+  const { id } = useParams();
+  const {user} = useAuth();
+  const location = useLocation();
   const [email, setEmail] = useState(user?.email || "");
-  const [formData, setFormData] = useState({
-    workType: "",
-    email: "",
-    gid: "",
-    decision: "",
-  });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const prefilledData = location.state?.formData || {};
+  const [formData, setFormData] = useState({
+  workType: prefilledData.workType || "",
+  email: prefilledData.email || "",
+  gid: prefilledData.gid || "",
+  decision: prefilledData.decision || "",
+});
 
   useEffect(() => {
     if (user?.email) {
@@ -23,12 +26,12 @@ const L1Form = () => {
   }, [user]);
 
   useEffect(() => {
-    if (isChecked && isValidEmail(email)) {
+    if (isValidEmail(email)) {
       setFormData((prev) => ({ ...prev, email }));
     } else {
       setFormData((prev) => ({ ...prev, email: "" }));
     }
-  }, [isChecked, email]);
+  }, [email]);
 
   const decisions = [
     "Duplicate",
@@ -45,7 +48,6 @@ const L1Form = () => {
     "Combination of Duplicate, Not Duplicate & Not Sure",
   ];
 
-  const handleCheckboxChange = (e) => setIsChecked(e.target.checked);
 
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -77,7 +79,6 @@ const L1Form = () => {
 
       setTimeout(() => {
         setSubmitted(false);
-        setIsChecked(false);
         setFormData({
           workType: "",
           gid: "",
@@ -115,21 +116,11 @@ const L1Form = () => {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-2xl mx-auto bg-white rounded-lg border-t-4 border-purple-600 shadow-sm">
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          {(user.role !== "L1_TEAM" ? (
+          <h1 className="text-3xl font-normal text-gray-800 mb-6">QC Form</h1>
+          ) : (
           <h1 className="text-3xl font-normal text-gray-800 mb-6">L1 Form</h1>
-
-          {/* Email Confirmation Checkbox */}
-          <label className="flex items-start space-x-2">
-            <input
-              type="checkbox"
-              checked={isChecked}
-              onChange={handleCheckboxChange}
-              className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
-            />
-            <span className="text-gray-700">
-              Record <span className="font-medium text-black">{email}</span> as
-              the email to be included with my response.
-            </span>
-          </label>
+          ))}
 
           {/* Work Type */}
           <div>
@@ -189,12 +180,11 @@ const L1Form = () => {
           <div className="flex justify-center pt-6">
             <button
               type="submit"
-              className={`flex items-center px-8 py-2 rounded-md text-white cursor-pointer ${
-                isChecked
-                  ? "bg-purple-600 hover:bg-purple-700"
-                  : "bg-gray-400 cursor-not-allowed"
-              }`}
-              disabled={!isChecked || loading}
+              className={`flex items-center px-8 py-2 rounded-md text-white cursor-pointer
+                  bg-purple-600 hover:bg-purple-700
+                  bg-gray-400 cursor-not-allowed`
+              }
+              disabled={loading}
             >
               {loading ? "Submitting..." : "Submit"}
             </button>
