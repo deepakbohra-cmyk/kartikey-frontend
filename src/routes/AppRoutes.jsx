@@ -85,6 +85,13 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/qcform/:id"
+          element={
+            <ProtectedRoute allowedRoles={qcRole}>
+              <L1Form />
+            </ProtectedRoute>
+          }
         <Route 
           path="/team/add" 
           element={
