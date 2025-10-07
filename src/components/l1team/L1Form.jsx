@@ -1,37 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { CheckCircle } from "lucide-react";
 import { l1TeamAPI } from "../../api/l1TeamAPI";
+import { qcTeamAPI } from "../../api/qcTeamAPI";
 import { useAuth } from "../../contexts/AuthContext";
 import { useParams, useLocation } from "react-router-dom";
 
 const L1Form = () => {
-  const { id } = useParams();
-  const {user} = useAuth();
+  const { id } = useParams(); 
+  const { user } = useAuth();
   const location = useLocation();
-  const [email, setEmail] = useState(user?.email || "");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const prefilledData = location.state?.formData || {};
+
   const [formData, setFormData] = useState({
-  workType: prefilledData.workType || "",
-  email: prefilledData.email || "",
-  gid: prefilledData.gid || "",
-  decision: prefilledData.decision || "",
-});
+    workType: prefilledData.workType || "",
+    gid: prefilledData.gid || "",
+    decision: prefilledData.decision || "",
+    email: user?.email || "",
+  });
 
   useEffect(() => {
     if (user?.email) {
-      setEmail(user.email);
+      setFormData((prev) => ({ ...prev, email: user.email }));
     }
   }, [user]);
-
-  useEffect(() => {
-    if (isValidEmail(email)) {
-      setFormData((prev) => ({ ...prev, email }));
-    } else {
-      setFormData((prev) => ({ ...prev, email: "" }));
-    }
-  }, [email]);
 
   const decisions = [
     "Duplicate",
@@ -48,52 +42,50 @@ const L1Form = () => {
     "Combination of Duplicate, Not Duplicate & Not Sure",
   ];
 
-
   const handleChange = (e) =>
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-
-  const isValidEmail = (email) =>
-    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email.trim());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !isChecked ||
-      !formData.workType ||
-      !formData.gid ||
-      !formData.decision ||
-      !formData.email
-    ) {
-      alert(
-        "Please fill all required fields and check the email confirmation box."
-      );
+    if (!formData.workType || !formData.gid || !formData.decision || !formData.email) {
+      alert("Please fill all required fields.");
       return;
     }
 
     try {
       setLoading(true);
-      const res = await l1TeamAPI.createForm(formData); // ✅ direct send
-      console.log("Form submitted:", res);
-      setSubmitted(true);
 
+      if (id) {
+        // ✅ If formId exists → QC saving feedback
+        const qcData = {
+          formId: { id: parseInt(id) },
+          workType: formData.workType,
+          gid: formData.gid,
+          decision: formData.decision,
+          email: user.email,
+        };
+        console.log("Saving QC form:", qcData);
+        await qcTeamAPI.saveQcForm(qcData);
+      } else {
+        // ✅ L1 creating a new form
+        console.log("Creating L1 form:", formData);
+        await l1TeamAPI.createForm(formData);
+      }
+
+      setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
         setFormData({
           workType: "",
           gid: "",
           decision: "",
-          email: email,
+          email: user.email,
         });
       }, 2000);
     } catch (error) {
-      console.error(
-        "Error submitting form:",
-        error.response?.data || error.message
-      );
-      alert(
-        `Submission failed: ${error.response?.data?.message || error.message}`
-      );
+      console.error("Error submitting form:", error.response?.data || error.message);
+      alert(`Submission failed: ${error.response?.data?.message || error.message}`);
     } finally {
       setLoading(false);
     }
@@ -116,16 +108,14 @@ const L1Form = () => {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-2xl mx-auto bg-white rounded-lg border-t-4 border-purple-600 shadow-sm">
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          {(user.role !== "L1TEAM" ? (
-          <h1 className="text-3xl font-normal text-gray-800 mb-6">QC Form</h1>
-          ) : (
-          <h1 className="text-3xl font-normal text-gray-800 mb-6">L1 Form</h1>
-          ))}
+          <h1 className="text-3xl font-normal text-gray-800 mb-6">
+            {id ? "QC Review Form" : "L1 Submission Form"}
+          </h1>
 
           {/* Work Type */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Work type *
+              Work Type *
             </label>
             <select
               name="workType"
@@ -134,7 +124,7 @@ const L1Form = () => {
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none appearance-none"
               required
             >
-              <option value="">Select work type</option>
+              <option value="">Select Work Type</option>
               <option value="NORMAL">Normal</option>
               <option value="REWORK">Rework</option>
             </select>
@@ -167,7 +157,7 @@ const L1Form = () => {
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none appearance-none"
               required
             >
-              <option value="">Select a decision</option>
+              <option value="">Select Decision</option>
               {decisions.map((d, i) => (
                 <option key={i} value={d}>
                   {d}
@@ -180,13 +170,14 @@ const L1Form = () => {
           <div className="flex justify-center pt-6">
             <button
               type="submit"
-              className={`flex items-center px-8 py-2 rounded-md text-white cursor-pointer
-                  bg-purple-600 hover:bg-purple-700
-                  bg-gray-400 cursor-not-allowed`
-              }
               disabled={loading}
+              className={`flex items-center px-8 py-2 rounded-md text-white ${
+                loading
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-purple-600 hover:bg-purple-700"
+              }`}
             >
-              {loading ? "Submitting..." : "Submit"}
+              {loading ? "Submitting..." : id ? "Save QC Response" : "Submit Form"}
             </button>
           </div>
         </form>
