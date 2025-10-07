@@ -28,6 +28,18 @@ export const qcTeamAPI = {
     }
   },
 
+  searchByGid: async (gid) => {
+    try {
+      const response = await apiClient.get(`${API_ENDPOINTS.QCTEAM.GETFORMS}/gid`, {
+        params: { gid }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error searching by GID:', error);
+      throw error;
+    }
+  },
+
   getQcForms: async (email) => {
     const response = await apiClient.get(API_ENDPOINTS.QCTEAM.GETQC, { params: { email } });
     return response.data;

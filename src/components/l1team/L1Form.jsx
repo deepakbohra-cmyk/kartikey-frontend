@@ -116,7 +116,7 @@ const L1Form = () => {
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-2xl mx-auto bg-white rounded-lg border-t-4 border-purple-600 shadow-sm">
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          {(user.role !== "L1_TEAM" ? (
+          {(user.role !== "L1TEAM" ? (
           <h1 className="text-3xl font-normal text-gray-800 mb-6">QC Form</h1>
           ) : (
           <h1 className="text-3xl font-normal text-gray-800 mb-6">L1 Form</h1>

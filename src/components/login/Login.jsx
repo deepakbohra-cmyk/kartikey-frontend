@@ -15,10 +15,17 @@ export default function LoginPage() {
     setLocalError(null);
     try {
       const userData = await login(email, password);
+      
       if (!userData) {
         throw new Error("Invalid credentials");
       }
-      navigate("/l1form"); 
+      if(userData.role === "L1TEAM"){
+         navigate("/l1form"); 
+      }
+      else {
+        navigate("/sheetdata"); 
+      }
+      
     } catch (err) {
       setLocalError(err.message || "Unexpected error");
     }
