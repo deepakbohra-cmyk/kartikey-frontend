@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { CheckCircle, Eye, EyeOff } from "lucide-react";
+import { userAPI } from "../../api/userAPI";
 
-const L1Form = () => {
+const AddEmployee = () => {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -12,14 +13,15 @@ const L1Form = () => {
   });
 
   const [submitted, setSubmitted] = useState(false);
-  const [showPassword, setShowPassword] = useState(false); // <-- new
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (
@@ -27,28 +29,46 @@ const L1Form = () => {
       !formData.password ||
       !formData.email ||
       !formData.role ||
-      !formData.location ||
-      !formData.tlemail
+      !formData.location
     ) {
       alert("Please fill all required fields.");
       return;
     }
 
-    console.log("Form submitted:", formData);
-    setSubmitted(true);
+    setLoading(true);
 
-    setTimeout(() => {
-      setSubmitted(false);
-      setFormData({
-        username: "",
-        password: "",
-        email: "",
-        role: "",
-        location: "",
-        tlemail: "",
-      });
-      setShowPassword(false);
-    }, 4000);
+    try {
+      // Prepare API payload
+      const payload = {
+        username: formData.username,
+        password: formData.password,
+        email: formData.email,
+        role: formData.role,
+        location: formData.location,
+        tlEmail: formData.tlemail || "", 
+      };
+
+      await userAPI.addUser(payload);
+
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setFormData({
+          username: "",
+          password: "",
+          email: "",
+          role: "",
+          location: "",
+          tlemail: "",
+        });
+        setShowPassword(false);
+      }, 4000);
+    } catch (err) {
+      console.error("Failed to add user:", err);
+      alert("Failed to add user. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -85,7 +105,7 @@ const L1Form = () => {
             />
           </div>
 
-          {/* Password field with show/hide toggle */}
+          {/* Password */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password *
@@ -104,7 +124,6 @@ const L1Form = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
               >
                 {showPassword ? <EyeOff className="w-5 h-5 text-gray-600" /> : <Eye className="w-5 h-5 text-gray-600" />}
@@ -112,6 +131,7 @@ const L1Form = () => {
             </div>
           </div>
 
+          {/* Email */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email *
@@ -128,6 +148,7 @@ const L1Form = () => {
             />
           </div>
 
+          {/* Role */}
           <div>
             <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
               Role *
@@ -144,8 +165,8 @@ const L1Form = () => {
                 -- Select Role --
               </option>
               <option value="ADMIN">ADMIN</option>
-              <option value="L1">L1</option>
-              <option value="QA">QA</option>
+              <option value="L1TEAM">L1</option>
+              <option value="QCTEAM">QCTEAM</option>
             </select>
           </div>
 
@@ -171,7 +192,7 @@ const L1Form = () => {
 
           <div>
             <label htmlFor="tlemail" className="block text-sm font-medium text-gray-700 mb-2">
-              TL-Email *
+              TL Email
             </label>
             <input
               id="tlemail"
@@ -181,13 +202,16 @@ const L1Form = () => {
               onChange={handleChange}
               placeholder="Enter TL's Email"
               className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none"
-              required
             />
           </div>
 
           <div className="flex justify-center pt-6">
-            <button type="submit" className="flex items-center px-8 py-2 rounded-md text-white bg-purple-600 hover:bg-purple-700">
-              Submit
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex items-center px-8 py-2 rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400"
+            >
+              {loading ? "Submitting..." : "Submit"}
             </button>
           </div>
         </form>
@@ -196,4 +220,4 @@ const L1Form = () => {
   );
 };
 
-export default L1Form;
+export default AddEmployee;
