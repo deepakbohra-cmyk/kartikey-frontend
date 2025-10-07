@@ -9,6 +9,7 @@ import OAuth2Redirect from "../components/login/OAuth2Redirect";
 import FeedbackTable from "../components/l1team/FeedbackTable";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import QcSheetData from "../components/qcteam/QcSheetData";
+import AddEmployee from "../components/qcteam/AddEmployee";
 
 function AppRoutes() {
   const adminRole = ["ADMIN"];
@@ -82,6 +83,14 @@ function AppRoutes() {
               <Team />
             </ProtectedRoute>
           }
+        />
+        <Route 
+          path="/team/add" 
+          element={
+            <ProtectedRoute allowedRoles={adminRole}>
+             <AddEmployee />
+            </ProtectedRoute>
+           } 
         />
         <Route path="/oauth2/redirect" element={<OAuth2Redirect />} />
         <Route

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { userAPI } from "../../api/userAPI";
 import { Mail, User, MapPin, UserCheck, Download, Shield } from "lucide-react";
 import Loading from "../common/Loding";
@@ -7,6 +8,7 @@ import SearchBar from "../common/SearchBar";
 import Pagination from "../common/Pagination";
 
 function Team() {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -179,36 +181,40 @@ function Team() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-9xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <div className="md:flex md:items-center md:justify-between">
-            {/* Left: Title + Subtitle */}
-            <div className="min-w-0">
-              <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
-                Team Directory
-              </h1>
-              <p className="mt-1 text-sm text-gray-500">
-                Showing {paginatedUsers.length} of {users.length} team members
-              </p>
-            </div>
+        <div className="mb-8 flex md:items-center md:justify-between">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl sm:truncate">
+              Team Directory
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Showing {paginatedUsers.length} of {users.length} team members
+            </p>
+          </div>
 
-            {/* Center: Search Bar */}
-            <div className="flex-1 flex justify-center">
-              <SearchBar searchQuery={searchQuery} onSearch={handleSearch} placeholder="Search Name" />
-            </div>
+          {/* Search Bar */}
+          <div className="flex-1 flex justify-center">
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearch={handleSearch}
+              placeholder="Search Name"
+            />
+          </div>
 
-            {/* Right: Buttons */}
-            <div className="mt-4 flex md:mt-0 md:ml-4 space-x-2">
-              <button className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-                Add Employee
-              </button>
-              <button
-                onClick={handleExport}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </button>
-            </div>
+          {/* Buttons */}
+          <div className="mt-4 flex md:mt-0 md:ml-4 space-x-2">
+            <button
+              onClick={() => navigate("/team/add")}
+              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+            >
+              Add Employee
+            </button>
+            <button
+              onClick={handleExport}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </button>
           </div>
         </div>
 
