@@ -41,10 +41,17 @@ export const API_ENDPOINTS = {
   QCTEAM: {
     GETFORMS: "/qcteam",
     GETFORM: (gid) => `/qcteam/gid?gid=${gid}`, 
+    GETQC: "/qcteam/qcforms",
+    GETFORMBYID: "/qcteam/id",
   },
   FEEDBACK: {
     CREATE: "/feedback",
     GETALL: "/feedback/getall",
     STATUS: (id) => `/feedback/${id}/status`
+  },
+  ADMIN: {
+    UPLOAD_USERS: "/super/users",
+    UPLOAD_FORMS: "/super/forms",
+    GET_QC_FORMS: "/super/getqcform",
   },
 };
