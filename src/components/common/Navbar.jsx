@@ -15,7 +15,7 @@ export default function Navbar() {
     { name: "QcSheets", path: "/qcsheetdata", roles: ["QCTEAM", "ADMIN"] },
     { name: "Sheets", path: "/sheetdata", roles: ["QCTEAM", "ADMIN"] },
     { name: "Gid Search", path: "/gid", roles: ["QCTEAM", "ADMIN"] },
-    { name: "Form", path: "/l1form", roles: ["L1TEAM", "QCTEAM", "ADMIN"] },
+    { name: "Form", path: "/l1form", roles: ["L1TEAM"] },
     {
       name: "Feedback",
       path: "/feedback",

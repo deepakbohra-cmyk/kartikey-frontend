@@ -84,6 +84,14 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/qcform/:id"
+          element={
+            <ProtectedRoute allowedRoles={qcRole}>
+              <L1Form />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/oauth2/redirect" element={<OAuth2Redirect />} />
         <Route
           path="/unauthorized"

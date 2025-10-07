@@ -9,6 +9,8 @@ import {
   Calendar,
   Download,
   Filter,
+  Save,
+  X
 } from "lucide-react";
 import Table from "../common/Table";
 import Pagination from "../common/Pagination";
@@ -16,8 +18,10 @@ import { qcTeamAPI } from "../../api/qcTeamAPI";
 import FilterControls from "../common/FilterControls";
 import SearchBar from "../common/SearchBar";
 import Loading from "../common/Loding";
+import { useNavigate } from "react-router-dom";
 
 const SheetData = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -47,6 +51,10 @@ const SheetData = () => {
       "On Hold": "bg-gray-100 text-gray-800",
     };
     return colors[decision] || "bg-gray-100 text-gray-800";
+  };
+
+  const handleRecord = (row) => {
+    navigate(`/qcform/${row.id}`, { state: { formData: row } });
   };
 
   const tableHeaders = [
@@ -128,6 +136,19 @@ const SheetData = () => {
         >
           {value || "-"}
         </span>
+      ),
+    },
+    {
+      key: "record",
+      label: "Record",
+      icon: Save,
+      render: (value, row) => (
+        <button
+           onClick={() => handleRecord(row)}
+          className="px-3 py-1 text-xs font-semibold text-white bg-purple-600 rounded-full hover:bg-purple-700"
+        >
+          Record
+        </button>
       ),
     },
   ];
@@ -280,7 +301,7 @@ const SheetData = () => {
   }); // Debug log
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 fixed">
       <div className="max-w-9xl mx-auto py-2 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-2">
@@ -367,5 +388,4 @@ const SheetData = () => {
     </div>
   );
 };
-
 export default SheetData;
