@@ -74,14 +74,12 @@ const QcSheetData = () => {
         if (!params[key] && params[key] !== 0) delete params[key];
       });
 
-      // Call proper API based on role
       if (user.role === "ADMIN") {
         response = await adminAPI.getQcForms(params);
       } else {
         response = await qcTeamAPI.getQcForms(user.email);
       }
 
-      // Normalize response
       let items = [];
       let total = 0;
 

@@ -53,5 +53,6 @@ export const API_ENDPOINTS = {
     UPLOAD_USERS: "/super/users",
     UPLOAD_FORMS: "/super/forms",
     GET_QC_FORMS: "/super/getqcform",
+    GET_ALL_METRICS: "/super/allmetric",
   },
 };

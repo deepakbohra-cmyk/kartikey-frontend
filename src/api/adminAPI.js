@@ -24,4 +24,10 @@ export const adminAPI = {
     const response = await apiClient.get(API_ENDPOINTS.ADMIN.GET_QC_FORMS, { params });
     return response.data;
   },
+
+  getAllMetrics: async (params = {}) => {
+    // params: { page, size, email }
+    const response = await apiClient.get(API_ENDPOINTS.ADMIN.GET_ALL_METRICS, { params });
+    return response.data;
+  },
 };
