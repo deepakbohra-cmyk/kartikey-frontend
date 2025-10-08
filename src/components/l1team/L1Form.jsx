@@ -59,7 +59,7 @@ const L1Form = () => {
       if (id) {
         // ✅ If formId exists → QC saving feedback
         const qcData = {
-          formId: { id: parseInt(id) },
+          formId: parseInt(id) ,
           workType: formData.workType,
           gid: formData.gid,
           decision: formData.decision,

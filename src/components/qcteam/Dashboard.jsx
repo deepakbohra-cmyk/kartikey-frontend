@@ -14,7 +14,6 @@ function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Debounce search input
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchQuery(searchInput.trim());
@@ -24,7 +23,6 @@ function Dashboard() {
     return () => clearTimeout(timer);
   }, [searchInput]);
 
-  // ✅ Fetch data from backend
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -125,10 +123,10 @@ function Dashboard() {
           loading={loading}
           emptyMessage="No records found"
           hoverable
-          // maxHeight="max-h-[calc(150vh-400px)]"
+          // maxHeight="max-h-[calc(100vh-400px)]"
         />
 
-        {/* Pagination */}
+        {/* Pagination */} 
         {!loading && data.length > 0 && (
           <Pagination
             currentPage={currentPage}

@@ -10,7 +10,7 @@ import {
   Download,
   Filter,
   Save,
-  X
+  X,
 } from "lucide-react";
 import Table from "../common/Table";
 import Pagination from "../common/Pagination";
@@ -142,14 +142,18 @@ const SheetData = () => {
       key: "record",
       label: "Record",
       icon: Save,
-      render: (value, row) => (
-        <button
-           onClick={() => handleRecord(row)}
-          className="px-3 py-1 text-xs font-semibold text-white bg-purple-600 rounded-full hover:bg-purple-700"
-        >
-          Record
-        </button>
-      ),
+      render: (value, row) => {
+        if (row.checked) return null;
+        console.log(row)
+        return (
+          <button
+            onClick={() => handleRecord(row)}
+            className="px-3 py-1 text-xs font-semibold text-white bg-purple-600 rounded-full hover:bg-purple-700"
+          >
+            Record
+          </button>
+        );
+      },
     },
   ];
 
