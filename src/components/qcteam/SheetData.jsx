@@ -143,18 +143,22 @@ const SheetData = () => {
       label: "Record",
       icon: Save,
       render: (value, row) => {
-        if (row.checked) return null;
-        console.log(row)
-        return (
-          <button
-            onClick={() => handleRecord(row)}
-            className="px-3 py-1 text-xs font-semibold text-white bg-purple-600 rounded-full hover:bg-purple-700"
-          >
-            Record
-          </button>
-        );
-      },
-    },
+      return (
+        <button
+          onClick={() => handleRecord(row)}
+          disabled={row.checked} // ✅ disables the button when checked is true
+          className={`px-3 py-1 text-xs font-semibold rounded-full transition
+          ${
+            row.checked
+              ? "bg-gray-400 cursor-not-allowed text-white"
+              : "bg-purple-600 hover:bg-purple-700 text-white"
+          }`}
+        >
+          Record
+        </button>
+    );
+  },
+},
   ];
 
   const fetchData = async () => {
