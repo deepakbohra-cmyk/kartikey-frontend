@@ -39,13 +39,11 @@ function Dashboard() {
           id: item.id,
           name: item.userName || "N/A", // top-level
           email: item.userEmail || "N/A", // top-level
-          role: item.role || "N/A", // top-level
-          team: item.user?.team || "N/A", // if team exists in user object, else N/A
+          role: item.role || "N/A", 
           filled: item.formFilled || 0,
           qcFilled: item.formChecked || 0,
           feedbackClicked: item.feedbackGiven || 0,
-          feedbackReceived: 0,
-          error: 0,
+          tlScore: Math.round(item.tlScore || 0),
           score: Math.round(item.score || 0),
         }));
 
@@ -73,8 +71,7 @@ function Dashboard() {
       { key: "filled", label: "Form Filled", align: "center" },
       { key: "qcFilled", label: "QC Form Filled", align: "center" },
       { key: "feedbackClicked", label: "Feedback Clicked", align: "center" },
-      { key: "feedbackReceived", label: "Feedback Received", align: "center" },
-      { key: "error", label: "Error", align: "center" },
+      { key: "tlScore", label: "TL Score", align: "center" },
       { key: "score", label: "Score", align: "center" },
     ],
     []
@@ -87,7 +84,7 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-10xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -128,7 +125,7 @@ function Dashboard() {
           loading={loading}
           emptyMessage="No records found"
           hoverable
-          maxHeight="max-h-[calc(100vh-400px)]"
+          // maxHeight="max-h-[calc(150vh-400px)]"
         />
 
         {/* Pagination */}
