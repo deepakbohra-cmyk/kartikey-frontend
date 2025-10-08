@@ -375,7 +375,7 @@ const SheetData = () => {
           />
         </div>
 
-        {data.length > 0 && (data.length === rowsPerPage || totalPages > 1) && (
+        {totalItems > 0 && (
           <div className="mt-2">
             <Pagination
               currentPage={currentPage}
