@@ -27,4 +27,9 @@ export const userAPI = {
     );
     return response.data;
   },
+
+  getUserById: async (id) => {
+    const response = await apiClient.get(API_ENDPOINTS.USER.GET_BY_ID(id));
+    return response.data;
+  },
 };
