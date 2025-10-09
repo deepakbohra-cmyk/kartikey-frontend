@@ -37,6 +37,7 @@ export const API_ENDPOINTS = {
     EDIT: (id) => `/user/edit/${id}`,
     DELETE: (id) => `/user/delete/${id}`,
     SEARCH: "/users/search",
+    GET_BY_ID: (id) => `/api/user/${id}`
   },
   QCTEAM: {
     GETFORMS: "/qcteam",
