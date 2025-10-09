@@ -13,7 +13,7 @@ export default function Navbar() {
     { name: "Dashboard", path: "/dashboard", roles: ["ADMIN"] },
     { name: "Team", path: "/team", roles: ["ADMIN"] },
     { name: "QcSheets", path: "/qcsheetdata", roles: ["QCTEAM", "ADMIN"] },
-    { name: "Sheets", path: "/sheetdata", roles: ["QCTEAM", "ADMIN"] },
+    { name: "Sheets", path: "/sheetdata", roles: ["ADMIN"] },
     { name: "Gid Search", path: "/gid", roles: ["QCTEAM", "ADMIN"] },
     { name: "Form", path: "/l1form", roles: ["L1TEAM"] },
     {
