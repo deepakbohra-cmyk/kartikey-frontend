@@ -32,4 +32,14 @@ export const userAPI = {
     const response = await apiClient.get(API_ENDPOINTS.USER.GET_BY_ID(id));
     return response.data;
   },
+
+  changePassword: async (passwordData) => {
+    const response = await apiClient.post(API_ENDPOINTS.USER.CHANGE_PASSWORD, passwordData);
+    return response.data;
+  },
+
+  resetPassword: async (emailData) => {
+    const response = await apiClient.post(API_ENDPOINTS.USER.RESET_PASSWORD, emailData);
+    return response.data;
+  },
 };

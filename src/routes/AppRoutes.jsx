@@ -10,6 +10,7 @@ import FeedbackTable from "../components/l1team/FeedbackTable";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import QcSheetData from "../components/qcteam/QcSheetData";
 import AddEmployee from "../components/qcteam/AddEmployee";
+import ForgotPassword from "../components/l1team/ForgotPassword";
 
 function AppRoutes() {
   const adminRole = ["ADMIN"];
@@ -97,6 +98,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={adminRole}>
              <AddEmployee />
+            </ProtectedRoute>
+           } 
+        />
+        <Route 
+          path="/forgotpassword" 
+          element={
+            <ProtectedRoute allowedRoles={l1Role}>
+             <ForgotPassword />
             </ProtectedRoute>
            } 
         />
