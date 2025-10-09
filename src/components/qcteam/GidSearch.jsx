@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from "react";
-import { Hash, Mail, User, Clock, Calendar, UserCheck } from "lucide-react";
+import {
+  Hash,
+  Mail,
+  User,
+  Clock,
+  Calendar,
+  UserCheck,
+  Save,
+} from "lucide-react";
 import Table from "../common/Table";
 import SearchBar from "../common/SearchBar";
 import Loading from "../common/Loding";
 import { qcTeamAPI } from "../../api/qcTeamAPI";
 import { useAuth } from "../../contexts/AuthContext";
 import { feedbackAPI } from "../../api/feedbackAPI";
+import { useNavigate } from "react-router-dom";
 
 const GidSearch = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const {user} = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -36,32 +46,28 @@ const GidSearch = () => {
     fetchData();
   }, [appliedSearch]);
 
-  const handleGiveFeedback = async (row) => {
-  try {
-    const qcEmail = user?.email;
-    if (!qcEmail) {
-      alert("User not logged in");
-      return;
+  // Load from sessionStorage on mount
+  useEffect(() => {
+    const savedSearch = sessionStorage.getItem("appliedSearch");
+    const savedData = sessionStorage.getItem("gidSearchData");
+
+    if (savedSearch && savedData) {
+      setAppliedSearch(savedSearch);
+      setData(JSON.parse(savedData));
     }
+  }, []);
 
-    const payload = {
-      formId: row.id,
-      agentEmail: row.email,
-      qcEmail: qcEmail,
-    };
+  // Save to sessionStorage whenever data or appliedSearch changes
+  useEffect(() => {
+    if (appliedSearch) {
+      sessionStorage.setItem("appliedSearch", appliedSearch);
+      sessionStorage.setItem("gidSearchData", JSON.stringify(data));
+    }
+  }, [data, appliedSearch]);
 
-    console.log("Submitting feedback payload:", payload);
-
-    const res = await feedbackAPI.createFeedback(payload);
-    console.log("Feedback API response:", res);
-
-    alert("Feedback submitted successfully ✅");
-  } catch (error) {
-    console.error("Error submitting feedback:", error.response?.data || error.message);
-    alert("Failed to submit feedback ❌");
-  }
-};
-
+  const handleRecord = (row) => {
+    navigate(`/qcform/${row.id}`, { state: { formData: row } });
+  };
 
   const getDecisionColor = (decision) => {
     const colors = {
@@ -110,16 +116,25 @@ const GidSearch = () => {
       ),
     },
     {
-      key: "action",
-      label: "Action",
-      render: (value, row) => (
-        <button
-          onClick={() => handleGiveFeedback(row)}
-          className="px-3 py-1 text-xs font-semibold text-white bg-purple-600 rounded-full hover:bg-purple-700"
-        >
-          Give Feedback
-        </button>
-      ),
+      key: "record",
+      label: "Record",
+      icon: Save,
+      render: (value, row) => {
+        return (
+          <button
+            onClick={() => handleRecord(row)}
+            disabled={row.checked} // ✅ disables the button when checked is true
+            className={`px-3 py-1 text-xs font-semibold rounded-full transition
+          ${
+            row.checked
+              ? "bg-gray-400 cursor-not-allowed text-white"
+              : "bg-purple-600 hover:bg-purple-700 text-white"
+          }`}
+          >
+            Record
+          </button>
+        );
+      },
     },
   ];
 
@@ -140,7 +155,7 @@ const GidSearch = () => {
               onSearch={setSearchQuery}
               placeholder="Enter GID..."
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === "Enter") {
                   setAppliedSearch(searchQuery);
                 }
               }}

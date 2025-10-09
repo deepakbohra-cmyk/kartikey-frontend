@@ -9,19 +9,16 @@ import {
   Calendar,
   Download,
   Filter,
-  Save,
   X,
 } from "lucide-react";
 import Table from "../common/Table";
 import Pagination from "../common/Pagination";
 import { qcTeamAPI } from "../../api/qcTeamAPI";
 import FilterControls from "../common/FilterControls";
-import SearchBar from "../common/SearchBar";
 import Loading from "../common/Loding";
-import { useNavigate } from "react-router-dom";
+import SearchBar from "../common/SearchBar";
 
 const SheetData = () => {
-  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -31,6 +28,7 @@ const SheetData = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [appliedSearch, setAppliedSearch] = useState("");
 
   const [filters, setFilters] = useState({
     email: "",
@@ -53,10 +51,6 @@ const SheetData = () => {
     return colors[decision] || "bg-gray-100 text-gray-800";
   };
 
-  const handleRecord = (row) => {
-    navigate(`/qcform/${row.id}`, { state: { formData: row } });
-  };
-
   const tableHeaders = [
     { key: "id", label: "ID", icon: Hash },
     {
@@ -70,6 +64,7 @@ const SheetData = () => {
       label: "Time",
       icon: Clock,
       render: (value) => {
+        if (!value) return <span className="text-sm text-gray-500">-</span>;
         const [hours, minutes] = value.split(":");
         return (
           <span className="text-sm text-gray-700">{`${hours}:${minutes}`}</span>
@@ -138,36 +133,31 @@ const SheetData = () => {
         </span>
       ),
     },
-    {
-      key: "record",
-      label: "Record",
-      icon: Save,
-      render: (value, row) => {
-      return (
-        <button
-          onClick={() => handleRecord(row)}
-          disabled={row.checked} // ✅ disables the button when checked is true
-          className={`px-3 py-1 text-xs font-semibold rounded-full transition
-          ${
-            row.checked
-              ? "bg-gray-400 cursor-not-allowed text-white"
-              : "bg-purple-600 hover:bg-purple-700 text-white"
-          }`}
-        >
-          Record
-        </button>
-    );
-  },
-},
   ];
 
   const fetchData = async () => {
     setLoading(true);
     try {
+      let response;
+
+      // ✅ If user typed a GID, search only that GID
+      if (searchQuery.trim()) {
+        response = await qcTeamAPI.searchByGid(searchQuery.trim());
+        const dataArray = Array.isArray(response)
+          ? response
+          : response?.data
+          ? [response.data]
+          : [];
+        setData(dataArray);
+        setTotalItems(dataArray.length);
+        setError(dataArray.length ? "" : "No record found for this GID");
+        return;
+      }
+
+      // ✅ Otherwise, fetch the full dataset (paginated)
       const params = {
         page: currentPage - 1,
         size: rowsPerPage,
-        search: searchQuery,
         ...appliedFilters,
       };
 
@@ -175,50 +165,21 @@ const SheetData = () => {
         if (!params[key] && params[key] !== 0) delete params[key];
       });
 
-      console.log("API params:", params);
-
-      const response = await qcTeamAPI.getForms(params);
-      console.log("API response:", response);
+      response = await qcTeamAPI.getForms(params);
 
       if (response && typeof response === "object") {
-        if (Array.isArray(response)) {
-          setData(response);
-
-          if (response.length === rowsPerPage) {
-            setTotalItems(currentPage * rowsPerPage + 1);
-            setTotalItems((currentPage - 1) * rowsPerPage + response.length);
-          }
-        } else if (response.content && Array.isArray(response.content)) {
-          setData(response.content);
-          setTotalItems(
-            response.totalElements || response.totalCount || response.total || 0
-          );
-        } else if (response.data && Array.isArray(response.data)) {
-          setData(response.data);
-          setTotalItems(
-            response.totalElements || response.totalCount || response.total || 0
-          );
-        } else if (response.items && Array.isArray(response.items)) {
-          setData(response.items);
-          setTotalItems(
-            response.totalElements || response.totalCount || response.total || 0
-          );
-        } else {
-          const dataArray =
-            response.content || response.data || response.items || [];
-          setData(dataArray);
-
-          const totalCount =
-            response.totalElements ||
+        const dataArray =
+          response.content ||
+          response.data ||
+          response.items ||
+          (Array.isArray(response) ? response : []);
+        setData(dataArray);
+        setTotalItems(
+          response.totalElements ||
             response.totalCount ||
             response.total ||
-            response.count ||
-            response.totalItems ||
-            response.totalRecords ||
-            0;
-
-          setTotalItems(totalCount);
-        }
+            dataArray.length
+        );
       } else {
         setData([]);
         setTotalItems(0);
@@ -312,49 +273,32 @@ const SheetData = () => {
     <div className="min-w-screen bg-gray-50 ">
       <div className="max-w-10xl mx-auto py-2 px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-2">
-          <div className="md:flex md:items-center md:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Data Overview
-              </h1>
-              <p className="mt-1 text-sm text-gray-500">
-                {totalItems > 0
-                  ? `Showing ${startIndex}–${endIndex} of ${totalItems} records`
-                  : "No records found"}
-              </p>
-            </div>
-
-            <div className="mt-4 flex md:mt-0 md:ml-4 space-x-2 relative">
-              <button
-                onClick={() => setShowFilters((prev) => !prev)}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
-              </button>
-              <button
-                onClick={handleExport}
-                disabled={data.length === 0}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Export
-              </button>
-            </div>
+        <div className="mb-6 md:flex md:items-center md:justify-between mt-2">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-gray-900">Data Overview</h1>
           </div>
 
-          {showFilters && (
-            <div className="absolute right-0 mt-2 w-200 mr-8 z-15">
-              <FilterControls
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onApplyFilters={handleApplyFilters}
-                onClearFilters={handleClearFilters}
-                isLoading={loading}
-              />
-            </div>
-          )}
+          <div className="flex-1 flex justify-center mx-4">
+            <SearchBar
+              searchQuery={searchQuery}
+              onSearch={setSearchQuery}
+              placeholder="Enter GID..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  fetchData();
+                }
+              }}
+            />
+            <button
+              onClick={() => {
+                setAppliedSearch(searchQuery);
+                fetchData();
+              }}
+              className="ml-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+            >
+              Search
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -363,7 +307,7 @@ const SheetData = () => {
           </div>
         )}
 
-        <div className="mb-2">
+        <div className="mb-2 mt-5">
           <Table
             headers={tableHeaders}
             data={data}
