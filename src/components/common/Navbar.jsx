@@ -11,7 +11,7 @@ export default function Navbar() {
   const username = user?.email;
   const navItems = [
     { name: "Dashboard", path: "/dashboard", roles: ["ADMIN"] },
-    { name: "Team", path: "/team", roles: ["QCTEAM", "ADMIN"] },
+    { name: "Team", path: "/team", roles: ["ADMIN"] },
     { name: "QcSheets", path: "/qcsheetdata", roles: ["QCTEAM", "ADMIN"] },
     { name: "Sheets", path: "/sheetdata", roles: ["QCTEAM", "ADMIN"] },
     { name: "Gid Search", path: "/gid", roles: ["QCTEAM", "ADMIN"] },

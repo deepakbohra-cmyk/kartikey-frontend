@@ -9,6 +9,7 @@ function Dashboard() {
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");  
   const [data, setData] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -19,7 +20,6 @@ function Dashboard() {
       setSearchQuery(searchInput.trim());
       setCurrentPage(1);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [searchInput]);
 
@@ -32,16 +32,17 @@ function Dashboard() {
           page: currentPage - 1,
           size: itemsPerPage,
           email: searchQuery || undefined,
+          role: selectedRole || undefined,    // 👈 role pass karo
         });
+
         const transformed = (response.content || []).map((item) => ({
           id: item.id,
-          name: item.userName || "N/A", // top-level
-          email: item.userEmail || "N/A", // top-level
-          role: item.role || "N/A", 
+          name: item.userName || "N/A",
+          email: item.userEmail || "N/A",
+          role: item.role || "N/A",
           filled: item.formFilled || 0,
           qcFilled: item.formChecked || 0,
           feedbackClicked: item.feedbackGiven || 0,
-          tlScore: Math.round(item.tlScore || 0),
           score: Math.round(item.score || 0),
         }));
 
@@ -58,10 +59,10 @@ function Dashboard() {
     };
 
     fetchData();
-  }, [currentPage, itemsPerPage, searchQuery]);
+  }, [currentPage, itemsPerPage, searchQuery, selectedRole]);
 
-  // ✅ Table headers
-  const tableHeaders = useMemo(
+  // 📊 Headers for L1
+  const l1Headers = useMemo(
     () => [
       { key: "name", label: "Name", minWidth: "150px" },
       { key: "role", label: "Role" },
@@ -69,15 +70,27 @@ function Dashboard() {
       { key: "filled", label: "Form Filled", align: "center" },
       { key: "qcFilled", label: "QC Form Filled", align: "center" },
       { key: "feedbackClicked", label: "Feedback Clicked", align: "center" },
-      { key: "tlScore", label: "TL Score", align: "center" },
       { key: "score", label: "Score", align: "center" },
     ],
     []
   );
 
+  const qcHeaders = useMemo(
+    () => [
+      { key: "name", label: "Name", minWidth: "150px" },
+      { key: "role", label: "Role" },
+      { key: "email", label: "Email", minWidth: "200px" },
+      { key: "filled", label: "Form Filled", align: "center" },
+      { key: "feedbackClicked", label: "Feedback Clicked", align: "center" },
+      { key: "score", label: "Score", align: "center" },
+    ],
+    []
+  );
+
+  const tableHeaders = selectedRole === "QCTEAM" ? qcHeaders : l1Headers;
+
   const totalPages = Math.ceil(totalRecords / itemsPerPage);
-  const startIndex =
-    totalRecords === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const startIndex = totalRecords === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endIndex = Math.min(currentPage * itemsPerPage, totalRecords);
 
   return (
@@ -90,22 +103,38 @@ function Dashboard() {
               All Users Dashboard
             </h1>
             <p className="mt-1 text-sm text-gray-500">
-              View all user metrics with search and pagination
+              View all user metrics with search and filters
             </p>
           </div>
 
-          {/* Search */}
-          <div className="relative max-w-md">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+          <div className="flex gap-3">
+            {/* 🔽 Role Dropdown */}
+            <select
+              value={selectedRole}
+              onChange={(e) => {
+                setSelectedRole(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="border rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="">All Teams</option>
+              <option value="L1TEAM">L1 TEAM</option>
+              <option value="QCTEAM">QC TEAM</option>
+            </select>
+
+            {/* 🔍 Search */}
+            <div className="relative max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search by email..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+              />
             </div>
-            <input
-              type="text"
-              placeholder="Search by name or email..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-            />
           </div>
         </div>
 
@@ -123,10 +152,9 @@ function Dashboard() {
           loading={loading}
           emptyMessage="No records found"
           hoverable
-          // maxHeight="max-h-[calc(100vh-400px)]"
         />
 
-        {/* Pagination */} 
+        {/* Pagination */}
         {!loading && data.length > 0 && (
           <Pagination
             currentPage={currentPage}

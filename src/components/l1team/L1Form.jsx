@@ -3,14 +3,16 @@ import { CheckCircle } from "lucide-react";
 import { l1TeamAPI } from "../../api/l1TeamAPI";
 import { qcTeamAPI } from "../../api/qcTeamAPI";
 import { useAuth } from "../../contexts/AuthContext";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 
 const L1Form = () => {
-  const { id } = useParams(); 
+  const { id } = useParams(); // QC form ID (optional)
   const { user } = useAuth();
   const location = useLocation();
-  const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   const prefilledData = location.state?.formData || {};
 
@@ -48,6 +50,7 @@ const L1Form = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Basic validation
     if (!formData.workType || !formData.gid || !formData.decision || !formData.email) {
       alert("Please fill all required fields.");
       return;
@@ -57,22 +60,28 @@ const L1Form = () => {
       setLoading(true);
 
       if (id) {
-        // ✅ If formId exists → QC saving feedback
+        // ✅ QC user submitting feedback
         const qcData = {
-          formId: parseInt(id) ,
+          formId: parseInt(id),
           workType: formData.workType,
           gid: formData.gid,
           decision: formData.decision,
           email: user.email,
         };
         console.log("Saving QC form:", qcData);
+
         await qcTeamAPI.saveQcForm(qcData);
-      } else {
-        // ✅ L1 creating a new form
-        console.log("Creating L1 form:", formData);
-        await l1TeamAPI.createForm(formData);
+
+        // Navigate immediately without showing overlay
+        navigate("/qcsheetdata", { replace: true });
+        return;
       }
 
+      // ✅ L1 user creating a new form
+      console.log("Creating L1 form:", formData);
+      await l1TeamAPI.createForm(formData);
+
+      // Show success overlay for L1
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
@@ -91,14 +100,13 @@ const L1Form = () => {
     }
   };
 
+  // L1 submission overlay
   if (submitted) {
     return (
       <div className="min-h-screen bg-purple-50 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-semibold text-gray-800">
-            Response Recorded
-          </h2>
+          <h2 className="text-2xl font-semibold text-gray-800">Response Recorded</h2>
         </div>
       </div>
     );
@@ -172,9 +180,7 @@ const L1Form = () => {
               type="submit"
               disabled={loading}
               className={`flex items-center px-8 py-2 rounded-md text-white ${
-                loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-purple-600 hover:bg-purple-700"
+                loading ? "bg-gray-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
               }`}
             >
               {loading ? "Submitting..." : id ? "Save QC Response" : "Submit Form"}
