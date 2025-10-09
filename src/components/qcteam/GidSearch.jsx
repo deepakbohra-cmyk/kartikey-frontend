@@ -13,7 +13,6 @@ import SearchBar from "../common/SearchBar";
 import Loading from "../common/Loding";
 import { qcTeamAPI } from "../../api/qcTeamAPI";
 import { useAuth } from "../../contexts/AuthContext";
-import { feedbackAPI } from "../../api/feedbackAPI";
 import { useNavigate } from "react-router-dom";
 
 const GidSearch = () => {

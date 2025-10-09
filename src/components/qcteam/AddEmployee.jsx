@@ -12,7 +12,7 @@ const AddEmployee = () => {
 
   const [formData, setFormData] = useState({
     username: "",
-    password: "",
+    password: "#*pass*#12",
     email: "",
     role: "",
     location: "",
@@ -133,41 +133,6 @@ const AddEmployee = () => {
               required
             />
           </div>
-
-          {/* Password — only for Add mode */}
-          {!isEditMode && (
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Password *
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter Password"
-                  className="w-full p-3 pr-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((s) => !s)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
-                >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5 text-gray-600" />
-                  ) : (
-                    <Eye className="w-5 h-5 text-gray-600" />
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* Email */}
           <div>

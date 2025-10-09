@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "../components/login/Login";
 import Dashboard from "../components/qcteam/Dashboard";
 import L1Form from "../components/l1team/L1Form";
@@ -10,7 +10,8 @@ import FeedbackTable from "../components/l1team/FeedbackTable";
 import ProtectedRoute from "../components/common/ProtectedRoute";
 import QcSheetData from "../components/qcteam/QcSheetData";
 import AddEmployee from "../components/qcteam/AddEmployee";
-import ForgotPassword from "../components/l1team/ForgotPassword";
+import ChangePassword from "../components/l1team/ChangePassword";
+import { useAuth } from "../contexts/AuthContext";
 
 function AppRoutes() {
   const adminRole = ["ADMIN"];
@@ -105,7 +106,7 @@ function AppRoutes() {
           path="/forgotpassword" 
           element={
             <ProtectedRoute allowedRoles={l1Role}>
-             <ForgotPassword />
+             <ChangePassword />
             </ProtectedRoute>
            } 
         />

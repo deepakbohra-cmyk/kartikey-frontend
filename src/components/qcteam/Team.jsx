@@ -112,12 +112,12 @@ function Team() {
               if (window.confirm(`Are you sure to delete ${user.username}?`)) {
                 try {
                   setLoading(true);
-                  await userAPI.editUser(user.id, { deleted: true }); // soft delete example
+                  await userAPI.deleteUser(user.id, { deleted: true }); // soft delete example
                   setUsers(users.filter((u) => u.id !== user.id));
                   setAllUsers(allUsers.filter((u) => u.id !== user.id));
                 } catch (err) {
                   alert("Failed to delete user.");
-                  console.error(err);
+                  console.error(err); 
                 } finally {
                   setLoading(false);
                 }
