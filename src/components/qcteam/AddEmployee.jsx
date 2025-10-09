@@ -1,8 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CheckCircle, Eye, EyeOff } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { userAPI } from "../../api/userAPI";
 
 const AddEmployee = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const existingUser = location.state?.user || null;
+
+  const isEditMode = !!existingUser;
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
@@ -16,6 +23,20 @@ const AddEmployee = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // ✅ Prefill data when editing
+  useEffect(() => {
+    if (existingUser) {
+      setFormData({
+        username: existingUser.username || "",
+        password: "",
+        email: existingUser.email || "",
+        role: existingUser.role || "",
+        location: existingUser.location || "",
+        tlemail: existingUser.tlEmail || "",
+      });
+    }
+  }, [existingUser]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -26,10 +47,10 @@ const AddEmployee = () => {
 
     if (
       !formData.username ||
-      !formData.password ||
       !formData.email ||
       !formData.role ||
-      !formData.location
+      !formData.location ||
+      (!isEditMode && !formData.password)
     ) {
       alert("Please fill all required fields.");
       return;
@@ -38,34 +59,34 @@ const AddEmployee = () => {
     setLoading(true);
 
     try {
-      // Prepare API payload
       const payload = {
         username: formData.username,
-        password: formData.password,
         email: formData.email,
         role: formData.role,
         location: formData.location,
-        tlEmail: formData.tlemail || "", 
+        tlEmail: formData.tlemail || "",
       };
 
-      await userAPI.addUser(payload);
+      if (!isEditMode) {
+        // Add new user
+        payload.password = formData.password;
+        await userAPI.addUser(payload);
+      } else {
+        // Edit existing user
+        await userAPI.editUser(existingUser.id, payload);
+      }
 
       setSubmitted(true);
       setTimeout(() => {
         setSubmitted(false);
-        setFormData({
-          username: "",
-          password: "",
-          email: "",
-          role: "",
-          location: "",
-          tlemail: "",
-        });
-        setShowPassword(false);
-      }, 4000);
+        navigate("/team");
+      }, 2500);
     } catch (err) {
-      console.error("Failed to add user:", err);
-      alert("Failed to add user. Please try again.");
+      console.error(
+        isEditMode ? "Failed to edit user:" : "Failed to add user:",
+        err
+      );
+      alert(`Failed to ${isEditMode ? "edit" : "add"} user. Please try again.`);
     } finally {
       setLoading(false);
     }
@@ -77,7 +98,9 @@ const AddEmployee = () => {
         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-semibold text-gray-800">
-            Added Employee Successfully
+            {isEditMode
+              ? "Employee Updated Successfully"
+              : "Added Employee Successfully"}
           </h2>
         </div>
       </div>
@@ -88,10 +111,16 @@ const AddEmployee = () => {
     <div className="min-h-screen bg-white-50">
       <div className="max-w-2xl mx-auto mt-12 bg-white rounded-lg border-t-4 border-purple-600 shadow-sm">
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          <h1 className="text-3xl font-normal text-gray-800 mb-6">Add Employee</h1>
+          <h1 className="text-3xl font-normal text-gray-800 mb-6">
+            {isEditMode ? "Edit Employee" : "Add Employee"}
+          </h1>
 
+          {/* Username */}
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Username *
             </label>
             <input
@@ -105,35 +134,47 @@ const AddEmployee = () => {
             />
           </div>
 
-          {/* Password */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password *
-            </label>
-            <div className="relative">
-              <input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter Password"
-                className="w-full p-3 pr-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((s) => !s)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+          {/* Password — only for Add mode */}
+          {!isEditMode && (
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
               >
-                {showPassword ? <EyeOff className="w-5 h-5 text-gray-600" /> : <Eye className="w-5 h-5 text-gray-600" />}
-              </button>
+                Password *
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter Password"
+                  className="w-full p-3 pr-12 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5 text-gray-600" />
+                  ) : (
+                    <Eye className="w-5 h-5 text-gray-600" />
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Email */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Email *
             </label>
             <input
@@ -150,7 +191,10 @@ const AddEmployee = () => {
 
           {/* Role */}
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Role *
             </label>
             <select
@@ -167,11 +211,16 @@ const AddEmployee = () => {
               <option value="ADMIN">ADMIN</option>
               <option value="L1TEAM">L1</option>
               <option value="QCTEAM">QCTEAM</option>
+              <option value="TL">TL</option>
             </select>
           </div>
 
+          {/* Location */}
           <div>
-            <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="location"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Location *
             </label>
             <select
@@ -190,8 +239,12 @@ const AddEmployee = () => {
             </select>
           </div>
 
+          {/* TL Email */}
           <div>
-            <label htmlFor="tlemail" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="tlemail"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               TL Email
             </label>
             <input
@@ -205,13 +258,18 @@ const AddEmployee = () => {
             />
           </div>
 
+          {/* Submit */}
           <div className="flex justify-center pt-6">
             <button
               type="submit"
               disabled={loading}
               className="flex items-center px-8 py-2 rounded-md text-white bg-purple-600 hover:bg-purple-700 disabled:bg-gray-400"
             >
-              {loading ? "Submitting..." : "Submit"}
+              {loading
+                ? "Processing..."
+                : isEditMode
+                ? "Update Employee"
+                : "Add Employee"}
             </button>
           </div>
         </form>

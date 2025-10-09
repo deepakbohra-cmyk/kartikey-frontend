@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { userAPI } from "../../api/userAPI";
-import { Mail, User, MapPin, UserCheck, Download, Shield } from "lucide-react";
+import { Mail, User, MapPin, UserCheck, Download, Shield, Edit, Trash2 } from "lucide-react";
 import Loading from "../common/Loding";
 import Table from "../common/Table";
 import SearchBar from "../common/SearchBar";
@@ -17,7 +17,8 @@ function Team() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
-  const tableHeaders = [
+  // Table Headers
+  const tableHeaders = useMemo(() => [
     {
       key: "username",
       label: "Name",
@@ -94,8 +95,43 @@ function Team() {
         </span>
       ),
     },
-  ];
+    {
+      key: "action",
+      label: "Action",
+      render: (_, user) => (
+        <div className="flex gap-2">
+          <button
+            className="text-blue-600 hover:text-blue-800"
+            onClick={() => navigate("/team/add", { state: { user } })}
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            className="text-red-600 hover:text-red-800"
+            onClick={async () => {
+              if (window.confirm(`Are you sure to delete ${user.username}?`)) {
+                try {
+                  setLoading(true);
+                  await userAPI.editUser(user.id, { deleted: true }); // soft delete example
+                  setUsers(users.filter((u) => u.id !== user.id));
+                  setAllUsers(allUsers.filter((u) => u.id !== user.id));
+                } catch (err) {
+                  alert("Failed to delete user.");
+                  console.error(err);
+                } finally {
+                  setLoading(false);
+                }
+              }
+            }}
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      ),
+    },
+  ], [users, allUsers, navigate]);
 
+  // Fetch all users
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -110,35 +146,26 @@ function Team() {
     }
   };
 
-  const searchUsers = async (query) => {
-    try {
-      setLoading(true);
-      setError("");
-      const data = await userAPI.searchUsers(query);
-      setUsers(data || []);
-    } catch (err) {
-      setError("Failed to search users. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  // Local search by username
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setUsers(allUsers);
       setCurrentPage(1);
     } else {
       const delayDebounce = setTimeout(() => {
-        searchUsers(searchQuery);
+        const filtered = allUsers.filter((user) =>
+          user.username.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setUsers(filtered);
         setCurrentPage(1);
       }, 400);
       return () => clearTimeout(delayDebounce);
     }
-  }, [searchQuery]);
+  }, [searchQuery, allUsers]);
 
   // Pagination
   const startIndex = (currentPage - 1) * itemsPerPage + 1;
@@ -147,7 +174,6 @@ function Team() {
     const start = (currentPage - 1) * itemsPerPage;
     return users.slice(start, start + itemsPerPage);
   }, [users, currentPage, itemsPerPage]);
-
   const totalPages = Math.ceil(users.length / itemsPerPage);
 
   const handleSearch = (query) => setSearchQuery(query);
