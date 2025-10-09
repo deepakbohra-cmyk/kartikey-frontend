@@ -9,7 +9,7 @@ function Dashboard() {
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedRole, setSelectedRole] = useState("");  
+  const [selectedRole, setSelectedRole] = useState("L1TEAM");  
   const [data, setData] = useState([]);
   const [totalRecords, setTotalRecords] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -68,8 +68,8 @@ function Dashboard() {
       { key: "role", label: "Role" },
       { key: "email", label: "Email", minWidth: "200px" },
       { key: "filled", label: "Form Filled", align: "center" },
-      { key: "qcFilled", label: "QC Form Filled", align: "center" },
-      { key: "feedbackClicked", label: "Feedback Clicked", align: "center" },
+      { key: "qcFilled", label: "Form Checked", align: "center" },
+      { key: "feedbackClicked", label: "Feedback Given", align: "center" },
       { key: "score", label: "Score", align: "center" },
     ],
     []
@@ -82,7 +82,6 @@ function Dashboard() {
       { key: "email", label: "Email", minWidth: "200px" },
       { key: "filled", label: "Form Filled", align: "center" },
       { key: "feedbackClicked", label: "Feedback Clicked", align: "center" },
-      { key: "score", label: "Score", align: "center" },
     ],
     []
   );
@@ -117,7 +116,6 @@ function Dashboard() {
               }}
               className="border rounded-md px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-purple-500"
             >
-              <option value="">All Teams</option>
               <option value="L1TEAM">L1 TEAM</option>
               <option value="QCTEAM">QC TEAM</option>
             </select>
