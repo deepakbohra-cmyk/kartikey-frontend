@@ -38,7 +38,7 @@ function Team() {
       console.log("No file is imported");
     }
   };
-  
+
   // Table Headers
   const tableHeaders = useMemo(
     () => [
@@ -129,7 +129,7 @@ function Team() {
             >
               <Edit className="w-4 h-4" />
             </button>
-            <button
+            {/* <button
               className="text-red-600 hover:text-red-800"
               onClick={async () => {
                 if (
@@ -150,7 +150,7 @@ function Team() {
               }}
             >
               <Trash2 className="w-4 h-4" />
-            </button>
+            </button> */}
           </div>
         ),
       },
@@ -210,22 +210,51 @@ function Team() {
     setCurrentPage(1);
   };
 
-  const handleExport = () => {
-    const csvContent = [
-      ["Name", "Role", "Email", "Team Lead", "Location"].join(","),
-      ...users.map(
-        (user) =>
-          `"${user.username}","${user.role}","${user.email}","${user.tlEmail}","${user.location}"`
-      ),
-    ].join("\n");
+  // const handleExport = () => {
+  //   const csvContent = [
+  //     ["Name", "Role", "Email", "Team Lead", "Location"].join(","),
+  //     ...users.map(
+  //       (user) =>
+  //         `"${user.username}","${user.role}","${user.email}","${user.tlEmail}","${user.location}"`
+  //     ),
+  //   ].join("\n");
 
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  //   const url = window.URL.createObjectURL(blob);
+  //   const a = document.createElement("a");
+  //   a.href = url;
+  //   a.download = `team-members-${new Date().toISOString().split("T")[0]}.csv`;
+  //   a.click();
+  //   window.URL.revokeObjectURL(url);
+  // };
+
+  // Reusable download function
+  const downloadFile = (content, filename, type = "text/csv") => {
+    const blob = new Blob([content], { type });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `team-members-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = filename;
     a.click();
     window.URL.revokeObjectURL(url);
+  };
+
+  // Inside your Team component
+  const handleDownload = () => {
+    // Define the CSV headers
+    const headers = ["username", "email",	"role",	"tlEmail", "location"];
+
+    // If you want just a template file with empty rows
+    const templateRows = [["", "", "", "", ""]];
+
+    // Combine headers and template rows
+    const csvContent = [
+      headers.join(","),
+      ...templateRows.map((r) => r.join(",")),
+    ].join("\n");
+
+    // Download the file
+    downloadFile(csvContent, "team-format.csv", "text/csv");
   };
 
   if (loading && users.length === 0) return <Loading />;
@@ -278,11 +307,11 @@ function Team() {
               Add Employee
             </button>
             <button
-              onClick={handleExport}
+              onClick={handleDownload}
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
             >
               <Download className="w-4 h-4 mr-2" />
-              Export
+              Download Format
             </button>
           </div>
         </div>
