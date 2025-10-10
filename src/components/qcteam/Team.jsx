@@ -1,11 +1,22 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { userAPI } from "../../api/userAPI";
-import { Mail, User, MapPin, UserCheck, Download, Shield, Edit, Trash2 } from "lucide-react";
+import {
+  Mail,
+  User,
+  MapPin,
+  UserCheck,
+  Download,
+  Shield,
+  Edit,
+  Trash2,
+  FolderUp,
+} from "lucide-react";
 import Loading from "../common/Loding";
 import Table from "../common/Table";
 import SearchBar from "../common/SearchBar";
 import Pagination from "../common/Pagination";
+import { adminAPI } from "../../api/adminAPI";
 
 function Team() {
   const navigate = useNavigate();
@@ -17,119 +28,135 @@ function Team() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
 
+  //Upload file
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      console.log("Selected CSV File:", file);
+      await adminAPI.uploadUsers(file);
+    } else {
+      console.log("No file is imported");
+    }
+  };
+  
   // Table Headers
-  const tableHeaders = useMemo(() => [
-    {
-      key: "username",
-      label: "Name",
-      icon: User,
-      render: (value) => (
-        <div className="flex items-center">
-          <div className="flex-shrink-0 h-10 w-10">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
-              <span className="text-sm font-medium text-white">
-                {value?.charAt(0)?.toUpperCase() || "U"}
-              </span>
+  const tableHeaders = useMemo(
+    () => [
+      {
+        key: "username",
+        label: "Name",
+        icon: User,
+        render: (value) => (
+          <div className="flex items-center">
+            <div className="flex-shrink-0 h-10 w-10">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
+                  {value?.charAt(0)?.toUpperCase() || "U"}
+                </span>
+              </div>
+            </div>
+            <div className="ml-4">
+              <div className="text-sm font-medium text-gray-900">{value}</div>
             </div>
           </div>
-          <div className="ml-4">
-            <div className="text-sm font-medium text-gray-900">{value}</div>
+        ),
+      },
+      {
+        key: "role",
+        label: "Role",
+        icon: Shield,
+        render: (value) => {
+          const roleColors = {
+            SUPERADMIN: "bg-red-100 text-red-800",
+            L1TEAM: "bg-purple-100 text-purple-800",
+            ADMIN: "bg-blue-100 text-blue-800",
+            QCTEAM: "bg-green-100 text-green-800",
+          };
+          return (
+            <span
+              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                roleColors[value] || "bg-gray-100 text-gray-800"
+              }`}
+            >
+              <Shield className="w-3 h-3 mr-1" />
+              {value}
+            </span>
+          );
+        },
+      },
+      {
+        key: "email",
+        label: "Email",
+        icon: Mail,
+        minWidth: "200px",
+        render: (value) => (
+          <div className="flex items-center text-sm text-gray-600">
+            <Mail className="w-4 h-4 mr-2 text-gray-400" />
+            {value}
           </div>
-        </div>
-      ),
-    },
-    {
-      key: "role",
-      label: "Role",
-      icon: Shield,
-      render: (value) => {
-        const roleColors = {
-          SUPERADMIN: "bg-red-100 text-red-800",
-          L1TEAM: "bg-purple-100 text-purple-800",
-          ADMIN: "bg-blue-100 text-blue-800",
-          QCTEAM: "bg-green-100 text-green-800",
-        };
-        return (
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              roleColors[value] || "bg-gray-100 text-gray-800"
-            }`}
-          >
-            <Shield className="w-3 h-3 mr-1" />
+        ),
+      },
+      {
+        key: "tlEmail",
+        label: "Team Lead",
+        icon: UserCheck,
+        render: (value) => (
+          <div className="flex items-center text-sm text-gray-600">
+            <User className="w-4 h-4 mr-2 text-gray-400" />
+            {value || "-"}
+          </div>
+        ),
+      },
+      {
+        key: "location",
+        label: "Location",
+        icon: MapPin,
+        render: (value) => (
+          <span className="inline-flex items-center text-sm text-gray-600">
+            <MapPin className="w-3 h-3 mr-1" />
             {value}
           </span>
-        );
+        ),
       },
-    },
-    {
-      key: "email",
-      label: "Email",
-      icon: Mail,
-      minWidth: "200px",
-      render: (value) => (
-        <div className="flex items-center text-sm text-gray-600">
-          <Mail className="w-4 h-4 mr-2 text-gray-400" />
-          {value}
-        </div>
-      ),
-    },
-    {
-      key: "tlEmail",
-      label: "Team Lead",
-      icon: UserCheck,
-      render: (value) => (
-        <div className="flex items-center text-sm text-gray-600">
-          <User className="w-4 h-4 mr-2 text-gray-400" />
-          {value || "-"}
-        </div>
-      ),
-    },
-    {
-      key: "location",
-      label: "Location",
-      icon: MapPin,
-      render: (value) => (
-        <span className="inline-flex items-center text-sm text-gray-600">
-          <MapPin className="w-3 h-3 mr-1" />
-          {value}
-        </span>
-      ),
-    },
-    {
-      key: "action",
-      label: "Action",
-      render: (_, user) => (
-        <div className="flex gap-2">
-          <button
-            className="text-blue-600 hover:text-blue-800"
-            onClick={() => navigate("/team/add", { state: { user } })}
-          >
-            <Edit className="w-4 h-4" />
-          </button>
-          <button
-            className="text-red-600 hover:text-red-800"
-            onClick={async () => {
-              if (window.confirm(`Are you sure to delete ${user.username}?`)) {
-                try {
-                  setLoading(true);
-                  await userAPI.deleteUser(user.id, { deleted: true }); // soft delete example
-                  setUsers(users.filter((u) => u.id !== user.id));
-                  setAllUsers(allUsers.filter((u) => u.id !== user.id));
-                } catch (err) {
-                  alert("Failed to delete user.");
-                  console.error(err); 
-                } finally {
-                  setLoading(false);
+      {
+        key: "action",
+        label: "Action",
+        render: (_, user) => (
+          <div className="flex gap-2">
+            <button
+              className="text-blue-600 hover:text-blue-800"
+              onClick={() => navigate("/team/add", { state: { user } })}
+            >
+              <Edit className="w-4 h-4" />
+            </button>
+            <button
+              className="text-red-600 hover:text-red-800"
+              onClick={async () => {
+                if (
+                  window.confirm(`Are you sure to delete ${user.username}?`)
+                ) {
+                  try {
+                    setLoading(true);
+                    await userAPI.deleteUser(user.id, { deleted: true }); // soft delete example
+                    setUsers(users.filter((u) => u.id !== user.id));
+                    setAllUsers(allUsers.filter((u) => u.id !== user.id));
+                  } catch (err) {
+                    alert("Failed to delete user.");
+                    console.error(err);
+                  } finally {
+                    setLoading(false);
+                  }
                 }
-              }
-            }}
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
-      ),
-    },
-  ], [users, allUsers, navigate]);
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    [users, allUsers, navigate]
+  );
 
   // Fetch all users
   const fetchUsers = async () => {
@@ -228,6 +255,22 @@ function Team() {
 
           {/* Buttons */}
           <div className="mt-4 flex md:mt-0 md:ml-4 space-x-2">
+            <button
+              type="button"
+              onClick={() => document.getElementById("fileInput").click()}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+            >
+              <FolderUp className="w-4 h-4 mr-2" />
+              Import File
+            </button>
+            <input
+              id="fileInput"
+              type="file"
+              accept=".csv,.xls,.xlsx"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
             <button
               onClick={() => navigate("/team/add")}
               className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
