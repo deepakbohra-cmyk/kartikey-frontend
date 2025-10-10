@@ -12,7 +12,7 @@ const AddEmployee = () => {
 
   const [formData, setFormData] = useState({
     username: "",
-    password: "#*pass*#12",
+    password: "vbsllp",
     email: "",
     role: "",
     location: "",
@@ -40,6 +40,20 @@ const AddEmployee = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  //Reset Password
+  const handleResetPassword = async () => {
+    if (!formData.email) return alert("User email not found!");
+
+    try {
+      await userAPI.resetPassword({ email: formData.email });
+      alert("Password has been reset successfully!");
+      setFormData((prev) => ({ ...prev, password: "vbsllp" }));
+    } catch (err) {
+      console.error("Failed to reset password:", err);
+      alert("Failed to reset password. Please try again.");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -111,9 +125,20 @@ const AddEmployee = () => {
     <div className="min-h-screen bg-white-50">
       <div className="max-w-2xl mx-auto mt-12 bg-white rounded-lg border-t-4 border-purple-600 shadow-sm">
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          <h1 className="text-3xl font-normal text-gray-800 mb-6">
-            {isEditMode ? "Edit Employee" : "Add Employee"}
-          </h1>
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-normal text-gray-800 mb-4">
+              {isEditMode ? "Edit Employee" : "Add Employee"}
+            </h1>
+            {isEditMode && (
+              <button
+                type="button"
+                className="px-4 py-2 rounded-md text-white bg-purple-600 hover:bg-purple-700"
+                onClick={handleResetPassword} // or your reset logic
+              >
+                Reset Password
+              </button>
+            )}
+          </div>
 
           {/* Username */}
           <div>
