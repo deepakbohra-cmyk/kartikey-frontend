@@ -32,7 +32,7 @@ export default function LoginPage() {
   };
 
   const startGoogleOAuth = () => {
-    window.location.href = `${import.meta.env.BASEURL}/oauth2/authorization/google`;
+    window.location.href = `${import.meta.env.VITE_BASEURL}/oauth2/authorization/google`;
   };
 
   return (
