@@ -262,13 +262,6 @@ const SheetData = () => {
   const endIndex = Math.min(currentPage * rowsPerPage, totalItems);
   const totalPages = Math.ceil(totalItems / rowsPerPage);
 
-  console.log("Pagination values:", {
-    totalItems,
-    totalPages,
-    currentPage,
-    rowsPerPage,
-  }); // Debug log
-
   return (
     <div className="min-w-screen bg-gray-50 ">
       <div className="max-w-10xl mx-auto py-2 px-4 sm:px-6 lg:px-8">

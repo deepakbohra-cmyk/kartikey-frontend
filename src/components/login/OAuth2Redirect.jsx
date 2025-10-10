@@ -17,7 +17,7 @@ const OAuth2Redirect = () => {
       if (role === "L1TEAM") {
         navigate("/l1form", { replace: true });
       } else {
-        navigate("/sheetdata", { replace: true });
+        navigate("/qcsheetdata", { replace: true });
       }
     } else {
       const savedToken = localStorage.getItem("authToken");

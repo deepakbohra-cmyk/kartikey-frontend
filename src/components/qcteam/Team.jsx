@@ -32,10 +32,8 @@ function Team() {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      console.log("Selected CSV File:", file);
       await adminAPI.uploadUsers(file);
     } else {
-      console.log("No file is imported");
     }
   };
 

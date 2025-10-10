@@ -68,7 +68,6 @@ const L1Form = () => {
           decision: formData.decision,
           email: user.email,
         };
-        console.log("Saving QC form:", qcData);
 
         await qcTeamAPI.saveQcForm(qcData);
 
@@ -78,7 +77,6 @@ const L1Form = () => {
       }
 
       // ✅ L1 user creating a new form
-      console.log("Creating L1 form:", formData);
       await l1TeamAPI.createForm(formData);
 
       // Show success overlay for L1

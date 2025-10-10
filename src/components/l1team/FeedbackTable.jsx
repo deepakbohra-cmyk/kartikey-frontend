@@ -84,7 +84,6 @@ function FeedbackTable() {
       setLoading(true);
       try {
         const response = await feedbackAPI.getAllFeedback();
-        console.log("API raw response:", response);
 
         const data = Array.isArray(response) ? response 
                     : response?.data 

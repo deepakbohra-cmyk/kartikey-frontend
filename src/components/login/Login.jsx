@@ -23,7 +23,7 @@ export default function LoginPage() {
          navigate("/l1form"); 
       }
       else {
-        navigate("/sheetdata"); 
+        navigate("/qcsheetdata"); 
       }
       
     } catch (err) {

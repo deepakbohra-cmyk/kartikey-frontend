@@ -11,7 +11,6 @@ import ProtectedRoute from "../components/common/ProtectedRoute";
 import QcSheetData from "../components/qcteam/QcSheetData";
 import AddEmployee from "../components/qcteam/AddEmployee";
 import ChangePassword from "../components/l1team/ChangePassword";
-import { useAuth } from "../contexts/AuthContext";
 
 function AppRoutes() {
   const adminRole = ["ADMIN"];

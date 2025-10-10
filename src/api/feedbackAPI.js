@@ -8,7 +8,6 @@ export const feedbackAPI = {
 
   getAllFeedback : async ()=>{
     const response = await apiClient.get(API_ENDPOINTS.FEEDBACK.GETALL);
-    console.log(response)
     return  response.data
   },
 
