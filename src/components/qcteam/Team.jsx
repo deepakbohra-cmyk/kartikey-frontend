@@ -127,7 +127,7 @@ function Team() {
             >
               <Edit className="w-4 h-4" />
             </button>
-            {/* <button
+            <button
               className="text-red-600 hover:text-red-800"
               onClick={async () => {
                 if (
@@ -148,7 +148,7 @@ function Team() {
               }}
             >
               <Trash2 className="w-4 h-4" />
-            </button> */}
+            </button>
           </div>
         ),
       },
