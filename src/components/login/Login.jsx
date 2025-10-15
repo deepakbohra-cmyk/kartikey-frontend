@@ -44,7 +44,7 @@ export default function LoginPage() {
         </p>
 
         {/* Google OAuth */}
-        <button
+        {/* <button
           onClick={startGoogleOAuth}
           className="w-full flex items-center justify-center gap-3 py-2 px-4 mb-4 border rounded-xl hover:shadow-sm transition-shadow"
         >
@@ -73,10 +73,10 @@ export default function LoginPage() {
             />
           </svg>
           <span className="text-sm font-medium">Continue with Google</span>
-        </button>
+        </button> */}
 
         {/* Divider */}
-        <div className="relative my-4">
+        {/* <div className="relative my-4">
           <div className="absolute inset-0 flex items-center" aria-hidden>
             <div className="w-full border-t border-gray-200"></div>
           </div>
@@ -85,7 +85,7 @@ export default function LoginPage() {
               or sign in with email
             </span>
           </div>
-        </div>
+        </div> */}
 
         {/* Email Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
